@@ -29,6 +29,7 @@ class UserProfile(TimeFramedModel,TimeStampedModel):
                                  processors=[ResizeToFill(85,85)],
                                  verbose_name='头像'
                                  )
+    description = models.CharField(max_length=150,null=True,blank=True,verbose_name='自我描述')
     vip = models.BooleanField(default=False,verbose_name='VIP会员性质')
     last_login_ip = models.GenericIPAddressField(unpack_ipv4=True,blank=True,null=True,verbose_name='最近一次登陆IP')
     register_ip = models.GenericIPAddressField(unpack_ipv4=True, blank=True, null=True,verbose_name='注册IP')
@@ -51,7 +52,7 @@ def create_userprofile_or_update_last_ip(sender, user, request, **kwargs):
     登陆进来时创建用户配置或者更新登陆ip
     """
     ip = get_ip_address_from_request(request)
-    profile, first = UserProfile.objects.get_or_create(user=user,nickname=user.username)
+    profile, first = UserProfile.objects.get_or_create(user=user)
     if first:
         profile.register_ip = ip
         profile.last_login_ip = ip

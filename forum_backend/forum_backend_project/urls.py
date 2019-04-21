@@ -23,15 +23,17 @@ from rest_framework.reverse import reverse
 @api_view(['GET'])
 def ApiRoot(request,format=None):
 	return Response({
-		'users':reverse('user:user-list',request=request,format=format)
-		# 'snippets':reverse('snippets:snippet-list',request=request,format=format)
+		'users':reverse('user:user-list',request=request,format=format),
+		'posts':reverse('post:post-list',request=request,format=format),
+        'comments':reverse('comment:comment-list',request=request,format=format)
 		})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
-    # path('', include('post.urls')),
     path('',ApiRoot,name='api-index'),
+    path('post/', include('post.urls')),
+    path('comment/', include('comment.urls')),
     path('user/',include('user.urls')),
     path('api/token/', jwt_views.obtain_jwt_token, name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.refresh_jwt_token, name='token_refresh'),
