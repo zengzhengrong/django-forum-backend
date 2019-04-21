@@ -1,0 +1,12 @@
+*~
+__pycache__
+*.pyc
+.settings
+.project
+.pydevproject
+logs/
+.vscode/
+Pipfile
+Pipfile.lock
+media/
+django_blog.code-workspace
