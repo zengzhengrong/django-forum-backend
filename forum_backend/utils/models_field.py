@@ -10,7 +10,6 @@ class ListField(models.TextField):
 
     '''
     description = "Stores a python list"
- 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
  
@@ -31,7 +30,7 @@ class ListField(models.TextField):
  
     def value_to_string(self, obj):
         value = self.value_from_object(obj)
-        return self.get_prep_value(value)
+        return self.get_db_prep_value(value)
 
 
 class DictListField(ListField):
@@ -41,12 +40,24 @@ class DictListField(ListField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
  
+     
+    def to_python(self, value):
+        value = super().to_python(self,value)
+        if not value:
+            value = []
  
+        if isinstance(value, list):
+            return value
+ 
+        return ast.literal_eval(value)
+
     def get_prep_value(self, value):
         if value is None:
             return value
+        print(value)
+        print(type(value))
         for item in value:
-            if isinstance(item,value):
+            if not isinstance(item,dict):
                 raise TypeError('The Field must be a list nesting in dict')
 
         return str(value)

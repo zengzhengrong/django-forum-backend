@@ -48,7 +48,7 @@ class Post(TimeStampedModel):
         self.save(update_fields=['views'])
 
     def __str__(self):
-        return f'<Post:{self.title}>'
+        return self.title
 
 '''
 Vote
@@ -72,6 +72,6 @@ class Vote(TimeStampedModel):
         verbose_name_plural = "投票"
 
     def __str__(self):
-        return f'<Vote:{self.question}>'
+        return self.question
 
 

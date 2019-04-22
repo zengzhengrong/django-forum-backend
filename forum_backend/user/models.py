@@ -42,7 +42,7 @@ class UserProfile(TimeFramedModel,TimeStampedModel):
         ordering = ['-created']
 
     def __str__(self):
-        return f'<UserProfile:{self.nickname}>'
+        return self.user.username
 
 
     

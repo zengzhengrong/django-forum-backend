@@ -13,7 +13,7 @@ from utils.models_field import DictListField
 '''
 class Category(TimeStampedModel):
     name = models.CharField(max_length=50,unique=True,blank=True,verbose_name='名称')
-    history = DictListField(unique=True,blank=True,verbose_name='历史记录')
+    history = DictListField(null=True,blank=True,verbose_name='历史记录')
 
 
     class Meta:
@@ -22,5 +22,5 @@ class Category(TimeStampedModel):
         verbose_name_plural = "分类"
 
     def __str__(self):
-        return f'<Category:{self.name}>'
+        return self.name
     

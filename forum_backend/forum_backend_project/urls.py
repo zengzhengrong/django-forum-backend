@@ -24,6 +24,7 @@ from rest_framework.reverse import reverse
 def ApiRoot(request,format=None):
 	return Response({
 		'users':reverse('user:user-list',request=request,format=format),
+        'categorys':reverse('category:category-list',request=request,format=format),
 		'posts':reverse('post:post-list',request=request,format=format),
         'comments':reverse('comment:comment-list',request=request,format=format)
 		})
@@ -32,6 +33,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('',ApiRoot,name='api-index'),
+    path('category/', include('category.urls')),
     path('post/', include('post.urls')),
     path('comment/', include('comment.urls')),
     path('user/',include('user.urls')),

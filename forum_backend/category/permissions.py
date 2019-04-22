@@ -1,12 +1,16 @@
 from rest_framework import permissions
 
 
-class IsCommentUserOrReadOnly(permissions.BasePermission):
-    """只有post的author才有权限资格进行删改更新"""
+class IsAdmin(permissions.BasePermission):
+    """只有UserAdmin才有权限资格进行get a list of user"""
     
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
     	# SAFE_METHODS = ('GET','HEAD','OPTIONS') 也就是说这几个请求不需要通过这个类的额外许可
         if request.method in permissions.SAFE_METHODS:
+            if view.action in ['retrieve']:
+                return request.user.is_authenticated and request.user.is_superuser
             return True
         
-        return obj.user == request.user
+
+        # 当userprofile的id和当前认证的用户指向同一个profile时才返回True
+        return request.user.is_superuser

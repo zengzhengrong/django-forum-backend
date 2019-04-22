@@ -11,7 +11,7 @@ class CommentSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField(help_text='动作描述')
     user_id = serializers.ReadOnlyField(source='user.id')
     user = serializers.ReadOnlyField(source='user.username')
-    content_type = serializers.ReadOnlyField(source='content_type.id',help_text='内容类型')
+    content_type_id = serializers.ReadOnlyField(source='content_type.id',help_text='内容类型')
     target = serializers.SerializerMethodField(help_text='评论目标对象数据')
     
     # category = serializers.SlugRelatedField(queryset=Category.objects.all(),

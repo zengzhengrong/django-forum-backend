@@ -12,14 +12,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
+    url = serializers.HyperlinkedIdentityField(view_name='user:user-detail'),
     profile = serializers.SerializerMethodField()
 
 
     class Meta:
         model = User
-        read_only_fields = ('username', 'email','last_login' ,'date_joined', 'is_active')
-        fields = ('username', 'email', 'profile','last_login' ,'date_joined', 'is_active')
+        read_only_fields = ('url','username', 'email','last_login' ,'date_joined', 'is_active')
+        fields = ('url','username', 'email', 'profile','last_login' ,'date_joined', 'is_active')
 
     def get_profile(self,object):
 
