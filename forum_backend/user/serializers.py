@@ -29,3 +29,8 @@ class UserSerializer(serializers.ModelSerializer):
         return {'status':'500','message':'get user profile error'}
 
 
+class UserSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        read_only_fields = ('id','username')
+        fields = ('id','username')

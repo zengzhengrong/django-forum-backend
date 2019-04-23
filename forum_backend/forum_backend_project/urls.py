@@ -26,6 +26,7 @@ def ApiRoot(request,format=None):
 		'users':reverse('user:user-list',request=request,format=format),
         'categorys':reverse('category:category-list',request=request,format=format),
 		'posts':reverse('post:post-list',request=request,format=format),
+        'notification':reverse('notification:notification-list',request=request,format=format),
         'comments':reverse('comment:comment-list',request=request,format=format)
 		})
 
@@ -34,6 +35,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('',ApiRoot,name='api-index'),
     path('category/', include('category.urls')),
+    path('notification/', include('notification.urls')),
     path('post/', include('post.urls')),
     path('comment/', include('comment.urls')),
     path('user/',include('user.urls')),
