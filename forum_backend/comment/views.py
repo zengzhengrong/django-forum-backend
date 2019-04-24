@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from post.models import Post
 from rest_framework.response import Response
 from rest_framework import status
+from . import handlers
 # Create your views here.
 
 def get_total(comments):
@@ -54,6 +55,8 @@ def get_subcomments(comments,total=None,q=None):
     q = Comment.objects.filter(id=0).all() # 初始化构建一个空查询集
     return get_subcomments(sub_comments,total=total,q=q)
 
+
+
 class CommentList(generics.ListCreateAPIView):
 
     queryset = Comment.objects.all()
@@ -73,9 +76,18 @@ class CommentList(generics.ListCreateAPIView):
             self.queryset = total
         return self.list(request, *args, **kwargs)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -1,6 +1,18 @@
 from rest_framework import serializers
 from notification.models import Notification
 from user.serializers import UserSimpleSerializer
+from post.models import Post
+
+
+
+def find_post(obj):
+    if hasattr(obj,'related_obj'):
+        obj = obj.related_obj
+        if not obj.__class__.__name__ == 'Post':
+            return find_post(obj)
+    if isinstance(obj,Post):
+        return obj
+    raise AttributeError('obj is not a Post instance')
 
 class NotificationSerializer(serializers.ModelSerializer):
     """
@@ -57,7 +69,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             }
         else:
             # 评论或者回复所属的帖子
-            post = obj.target
+            post = find_post(obj.target)
             return {
                 'post_id': post.id,
                 'post_title': post.title

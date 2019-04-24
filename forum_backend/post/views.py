@@ -16,3 +16,8 @@ class PostViewSets(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    # def get_permissions(self):
+    #     if self.action in ('create',):
+    #         self.permission_classes = [permissions.IsAdminUser]
+    #     return [permission() for permission in self.permission_classes]
+
