@@ -31,7 +31,7 @@ class Comment(TimeStampedModel):
     nested = models.BooleanField(default=False,verbose_name='评论内联性质')
     voted = models.BooleanField(default=False,verbose_name='投票性质')
     sub_comment = GenericRelation('Comment',content_type_field='content_type',object_id_field='object_id',verbose_name='子评论')
-
+    
     class Meta:
         
         ordering = ['-created']

@@ -1,14 +1,15 @@
 from django.shortcuts import render
-from rest_framework import mixins,viewsets,permissions
+from rest_framework import mixins,viewsets,permissions,status
 from notification.serializers import NotificationSerializer
 from notification.models import Notification
+from rest_framework.response import Response
 
 # Create your views here.
 
 class NotificationViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
-                        mixins.UpdateModelMixin,
                         mixins.DestroyModelMixin,
+                        mixins.UpdateModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = NotificationSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -21,15 +22,9 @@ class NotificationViewSet(mixins.ListModelMixin,
         queryset = Notification.objects.filter(receiver=self.request.user).all()
         return queryset
 
-    def perform_destroy(self, instance):
-        # 覆写DELETE 方法进行软删除
-        pk = self.kwargs['pk']
-        instance = Notification.objects.get(id=pk)
-        instance.delete()
-        instance.save()
 
     def update(self, request, *args, **kwargs):
-        # UPDATE 方法进行更改为已读
+        # UPDATE 方法进行更改为已读，且只允许修改为已读
         pk = self.kwargs['pk']
         instance = Notification.objects.get(id=pk)
         if instance.receiver != request.user:

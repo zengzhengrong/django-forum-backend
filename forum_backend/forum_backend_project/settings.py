@@ -37,6 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
     'rest_framework',
     'user',
     'category',
@@ -132,7 +136,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 AUTH_USER_MODEL = 'auth.user'
-
+AUTH_USER_ADMINS = ['zzr']
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
