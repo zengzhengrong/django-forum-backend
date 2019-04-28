@@ -34,6 +34,7 @@ def has_subcomments(comments):
 def get_subcomments(comments,total=None,q=None):
     '''
     查询集虽然是可迭代对象，但是并非一般序列，没有list.extend()方法，需要用到 | 运算
+    遍历树
     '''
     total_copy = total
 

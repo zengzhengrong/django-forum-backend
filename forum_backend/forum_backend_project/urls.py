@@ -27,7 +27,11 @@ def ApiRoot(request,format=None):
         'categorys':reverse('category:category-list',request=request,format=format),
 		'posts':reverse('post:post-list',request=request,format=format),
         'notification':reverse('notification:notification-list',request=request,format=format),
-        'comments':reverse('comment:comment-list',request=request,format=format)
+        'comments':reverse('comment:comment-list',request=request,format=format),
+        'authentication':{
+            'login':reverse('user:user-login',request=request,format=format),
+            'logout':reverse('user:user-logout',request=request,format=format)
+            }
 		})
 
 urlpatterns = [
@@ -39,8 +43,6 @@ urlpatterns = [
     path('post/', include('post.urls')),
     path('comment/', include('comment.urls')),
     path('user/',include('user.urls')),
-    path('rest-auth/',include('rest_auth.urls')),
-    path('rest-auth/registration',include('rest_auth.registration.urls'))
     # path('api/token/', jwt_views.obtain_jwt_token, name='token_obtain_pair'),
     # path('api/token/refresh/', jwt_views.refresh_jwt_token, name='token_refresh'),
 ]

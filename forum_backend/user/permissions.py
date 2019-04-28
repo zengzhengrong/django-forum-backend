@@ -9,8 +9,8 @@ class IsUserOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         
-        # 当userprofile的id和当前认证的用户指向同一个profile时才返回True
-        return obj.id == request.user.profile.id
+        # 当user的id和当前认证的用户指向同一个id时才返回True
+        return obj.id == request.user.id
 
 class IsAdmin(permissions.BasePermission):
     """只有UserAdmin才有权限资格进行get a list of user"""
