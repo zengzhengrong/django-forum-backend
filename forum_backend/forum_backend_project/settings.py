@@ -149,10 +149,18 @@ REST_FRAMEWORK = {
 
 SITE_ID = 1
 
+# 配置邮箱
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'bhg889@163.com'
+EMAIL_HOST_PASSWORD = 'aa556689'
+EMAIL_SUBJECT_PREFIX = 'django-forum-email'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'bhg889@163.com'
 
-REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'user.serializers.UserSerializer'
-}
+# 更改密码时需要验证旧密码
+OLD_PASSWORD_FIELD_ENABLED = True
 
 JWT_AUTH = {
     'JWT_AUTH_COOKIE': 'token',

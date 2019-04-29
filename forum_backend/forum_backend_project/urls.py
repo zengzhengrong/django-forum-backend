@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path,include,re_path
+from django.views.generic import TemplateView
 from rest_framework_jwt import views as jwt_views
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -30,7 +31,10 @@ def ApiRoot(request,format=None):
         'comments':reverse('comment:comment-list',request=request,format=format),
         'authentication':{
             'login':reverse('user:user-login',request=request,format=format),
-            'logout':reverse('user:user-logout',request=request,format=format)
+            'logout':reverse('user:user-logout',request=request,format=format),
+            'send-reset-password-email':reverse('user:user-password-reset',request=request,format=format),
+            'reset-password-confirm':reverse('user:user-password-confirm',request=request,format=format),
+            'password-change':reverse('user:user-password-change',request=request,format=format)
             }
 		})
 
@@ -43,6 +47,6 @@ urlpatterns = [
     path('post/', include('post.urls')),
     path('comment/', include('comment.urls')),
     path('user/',include('user.urls')),
-    # path('api/token/', jwt_views.obtain_jwt_token, name='token_obtain_pair'),
-    # path('api/token/refresh/', jwt_views.refresh_jwt_token, name='token_refresh'),
+    # this url is used to generate email content uidb64
+    path('user/password-reset/confirm/<uidb64>/<token>/',TemplateView.as_view(template_name="password_reset_confirm.html"),name='password_reset_confirm')
 ]

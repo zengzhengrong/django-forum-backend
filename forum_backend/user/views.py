@@ -6,7 +6,9 @@ from django.shortcuts import render
 from rest_framework import generics,permissions,views,status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer,UserProfileSerializer,LoginSerializer,JWTSerializer
+from .serializers import (UserSerializer,UserProfileSerializer,LoginSerializer,JWTSerializer,
+						RegisterSerializer,PasswordResetSerializer,PasswordResetConfirmSerializer,
+						PasswordChangeSerializer)
 from user.permissions import IsUserOwnerOrReadOnly ,IsAdmin
 from user.models import UserProfile
 from rest_framework_jwt.settings import api_settings
@@ -23,7 +25,7 @@ jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 class UserList(generics.ListAPIView):
 	"""
-	Get User List
+	获取用户列表
 	"""
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
@@ -33,7 +35,7 @@ class UserList(generics.ListAPIView):
 
 class UserDetail(generics.RetrieveUpdateAPIView):
 	"""
-	Retrieve a Detail User
+	获取用户详情或者更新用户信息
 	"""
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
@@ -50,9 +52,9 @@ class UserDetail(generics.RetrieveUpdateAPIView):
 
 class Login(generics.GenericAPIView):
 	'''
-	二选一登陆方式：  
-	username或者email  
+	二选一登陆方式:username或者email  
 	生成token的有效期为300s(5分钟)
+	当token失效时，服务端后端session（这个Django默认是7天）也随之删除
 	'''
 	permission_classes = (permissions.AllowAny,)
 	serializer_class = LoginSerializer
@@ -88,6 +90,9 @@ class Login(generics.GenericAPIView):
 		return self.get_response()
 
 class Logout(views.APIView):
+	'''
+	登出
+	'''
 	permission_classes = (permissions.AllowAny,)
 
 	def post(self, request, *args, **kwargs):
@@ -100,3 +105,84 @@ class Logout(views.APIView):
 		if jwt_settings.JWT_AUTH_COOKIE:
 			response.delete_cookie(jwt_settings.JWT_AUTH_COOKIE)
 		return response
+
+class Register(generics.CreateAPIView):
+	'''
+	注册
+	'''
+	serializer_class = RegisterSerializer
+	permission_classes = (permissions.AllowAny,)
+
+
+	def get_response_data(self, user):
+		data = {
+			'user': user,
+			'token': self.token
+		}
+		return JWTSerializer(instance=data,context={'request': self.request}).data
+
+	def create(self, request, *args, **kwargs):
+		serializer = self.get_serializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+		user = self.perform_create(serializer)
+		headers = self.get_success_headers(serializer.data)
+		print(headers)
+
+		return Response(self.get_response_data(user),status=status.HTTP_201_CREATED,headers=headers)
+
+	def perform_create(self, serializer):
+		user = serializer.save(self.request)
+		self.token = jwt_encode(user)
+		return user
+
+
+
+
+class PasswordResetView(generics.GenericAPIView):
+	'''
+	通过email发送重置密码密码请求
+	'''
+	serializer_class = PasswordResetSerializer
+	permission_classes = (permissions.AllowAny,)
+
+	def post(self, request, *args, **kwargs):
+		# Create a serializer with request.data
+		serializer = self.get_serializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+
+		serializer.save()
+		# Return the success message with OK HTTP status
+		return Response(
+			{"detail": "Password reset e-mail has been sent."},
+			status=status.HTTP_200_OK
+		)
+
+
+class PasswordResetConfirm(generics.GenericAPIView):
+	'''
+	确认重置密码  
+	uid和token,在邮箱的链接中已给出，前端传入  
+	'''
+	serializer_class = PasswordResetConfirmSerializer
+	permission_classes = (permissions.AllowAny,)
+
+	def post(self, request, *args, **kwargs):
+		serializer = self.get_serializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+		serializer.save()
+		return Response({"detail": "Password has been reset with the new password.Please re-login "})
+
+
+class PasswordChange(generics.GenericAPIView):
+	'''
+	更改密码
+	仅用户认证后才可调用
+	'''
+	serializer_class = PasswordChangeSerializer
+	permission_classes = (permissions.IsAuthenticated,)
+
+	def post(self, request, *args, **kwargs):
+		serializer = self.get_serializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+		serializer.save()
+		return Response({"detail": "New password has been saved."})
