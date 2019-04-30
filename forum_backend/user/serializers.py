@@ -9,6 +9,7 @@ from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode as uid_decoder
 from django.contrib.auth.tokens import default_token_generator
 from .models import UserProfile
+from django.core.signing import TimestampSigner
 
 User = get_user_model()
 
@@ -80,28 +81,18 @@ class LoginSerializer(serializers.Serializer):
     def authenticate(self, **kwargs):
         return authenticate(self.context['request'], **kwargs)
 
-    def _validate_username(self, username, password):
-        user = None
-
-        if username and password:
-            user = self.authenticate(username=username, password=password)
-        else:
-            msg = _('Must include "username" and "password".')
-            raise exceptions.ValidationError(msg)
-
-        return user
-
     def _validate_username_email(self, username, email, password):
         user = None
-
         if email and password:
             user = self.authenticate(email=email, password=password)
+
         elif username and password:
             user = self.authenticate(username=username, password=password)
+
         else:
             msg = _('Must include either "username" or "email" and "password".')
             raise exceptions.ValidationError(msg)
-
+        print(user)
         return user
 
     def validate(self, attrs):
@@ -119,13 +110,21 @@ class LoginSerializer(serializers.Serializer):
 
         if username:
             user = self._validate_username_email(username, '', password)
-
-        # Did we get back an active user?
+        # self.authenticate 将不会认证is_active为False的时候，在只填入username时会出现user=None ，这里需要重新根据username获取user对象
+        if not user:
+            try:
+                user = UserModel.objects.filter(username=username).first()
+                if not user.check_password(password):
+                    msg = '密码错误'
+                    raise exceptions.ValidationError(msg)
+            except AttributeError:
+                pass
         if user:
             if not user.is_active:
                 msg = _('User account is disabled.')
                 raise exceptions.ValidationError(msg)
         else:
+
             msg = _('Unable to log in with provided credentials.')
             raise exceptions.ValidationError(msg)
 
@@ -176,7 +175,34 @@ class RegisterSerializer(serializers.Serializer):
         username = request.data.get('username')
         password = request.data.get('password1')
         email = request.data.get('email')
-        user = UserModel.objects.create_user(username=username,password=password,email=email)
+        user = UserModel.objects.create_user(username=username,password=password,email=email,is_active=False)
+        return user
+
+class VerifyRegisterEmailSerializer(serializers.Serializer):
+    signature = serializers.CharField()
+
+    username = None
+
+    def validate(self,data):
+        signature = data.get('signature',None)
+        if not signature:
+            return serializers.ValidationError('请输入有效参数')
+        sign = TimestampSigner()
+        try:
+            username = sign.unsign(signature,max_age=10)
+            print(username)
+            self.username = username
+        except Exception as e:
+            print(e)
+            return serializers.ValidationError('签名验证失败')
+        return data
+    
+    def save(self):
+        print(self.username)
+        user= UserModel.objects.get(username=self.username)
+        if user:
+            user.is_active = True
+            user.save()
         return user
 
 class PasswordResetSerializer(serializers.Serializer):
@@ -209,10 +235,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     """
     Serializer for confirm reset 
     """
-    new_password1 = serializers.CharField(max_length=128)
-    new_password2 = serializers.CharField(max_length=128)
     uid = serializers.CharField()
     token = serializers.CharField()
+    new_password1 = serializers.CharField(max_length=128)
+    new_password2 = serializers.CharField(max_length=128)
+
 
     set_password_form_class = SetPasswordForm
 
@@ -223,13 +250,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         try:
             uid = force_text(uid_decoder(attrs['uid']))
             self.user = UserModel._default_manager.get(pk=uid)
+            print(self.user)
         except (TypeError, ValueError, OverflowError, UserModel.DoesNotExist):
             raise ValidationError({'uid': ['Invalid value']})
-
         # Construct SetPasswordForm instance
-        self.set_password_form = self.set_password_form_class(
-            user=self.user, data=attrs
-        )
+        self.set_password_form = self.set_password_form_class(user=self.user, data=attrs)
         if not self.set_password_form.is_valid():
             raise serializers.ValidationError(self.set_password_form.errors)
         if not default_token_generator.check_token(self.user, attrs['token']):
@@ -238,6 +263,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         return attrs
 
     def save(self):
+        print('to change passwrod')
         return self.set_password_form.save()
 
 class PasswordChangeSerializer(serializers.Serializer):

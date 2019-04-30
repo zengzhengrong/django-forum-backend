@@ -47,6 +47,8 @@ urlpatterns = [
     path('post/', include('post.urls')),
     path('comment/', include('comment.urls')),
     path('user/',include('user.urls')),
-    # this url is used to generate email content uidb64
-    path('user/password-reset/confirm/<uidb64>/<token>/',TemplateView.as_view(template_name="password_reset_confirm.html"),name='password_reset_confirm')
+    # this url is used to generate email content uidb64 and token for password_reset_confirm
+    path('user/password-reset/confirm/<uidb64>/<token>/',TemplateView.as_view(template_name="password_reset_confirm.html"),name='password_reset_confirm'),
+    # this url is used to generate email content key for register_confirm
+    path('user/register-confirm-email/<signature>/', TemplateView.as_view(),name='register_confirm')
 ]

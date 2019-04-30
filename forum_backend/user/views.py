@@ -8,14 +8,16 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from .serializers import (UserSerializer,UserProfileSerializer,LoginSerializer,JWTSerializer,
 						RegisterSerializer,PasswordResetSerializer,PasswordResetConfirmSerializer,
-						PasswordChangeSerializer)
+						PasswordChangeSerializer,VerifyRegisterEmailSerializer)
 from user.permissions import IsUserOwnerOrReadOnly ,IsAdmin
 from user.models import UserProfile
 from rest_framework_jwt.settings import api_settings
 from utils.jwt import jwt_encode
+from utils.tasks import send_active_email
 # from rest_framework_jwt.serializers import JSONWebTokenSerializer
 from rest_framework_jwt.settings import api_settings as jwt_settings
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.core.signing import TimestampSigner
 
 User = get_user_model()
 
@@ -39,6 +41,7 @@ class UserDetail(generics.RetrieveUpdateAPIView):
 	"""
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsUserOwnerOrReadOnly)
 
 	def put(self, request, *args, **kwargs):
 		self.serializer_class = UserProfileSerializer
@@ -132,13 +135,35 @@ class Register(generics.CreateAPIView):
 
 	def perform_create(self, serializer):
 		user = serializer.save(self.request)
+		signature = self.generate_signature(user.username)
+		send_active_email(user,signature)
+		print('active email have been send')
 		self.token = jwt_encode(user)
 		return user
 
+	def generate_signature(self,username):
+		signer = TimestampSigner(salt='extra') # 加盐
+		signature = signer.sign(username)
+		print(signature)
+		return signature
 
 
+class VerifyRegisterEmail(generics.GenericAPIView):
+	'''
+	注册激活确认
+	'''
+	serializer_class = VerifyRegisterEmailSerializer
+	permission_classes = (permissions.AllowAny,)
 
-class PasswordResetView(generics.GenericAPIView):
+	def post(self, request, *args, **kwargs):
+		# Create a serializer instance with request.data
+		serializer = self.get_serializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+		
+		serializer.save()
+		return Response({'detali':'Your account have been active suceess'},status=status.HTTP_200_OK)
+
+class PasswordReset(generics.GenericAPIView):
 	'''
 	通过email发送重置密码密码请求
 	'''
@@ -152,10 +177,7 @@ class PasswordResetView(generics.GenericAPIView):
 
 		serializer.save()
 		# Return the success message with OK HTTP status
-		return Response(
-			{"detail": "Password reset e-mail has been sent."},
-			status=status.HTTP_200_OK
-		)
+		return Response({"detail": "Password reset e-mail has been sent."},status=status.HTTP_200_OK)
 
 
 class PasswordResetConfirm(generics.GenericAPIView):
@@ -168,10 +190,10 @@ class PasswordResetConfirm(generics.GenericAPIView):
 
 	def post(self, request, *args, **kwargs):
 		serializer = self.get_serializer(data=request.data)
-		serializer.is_valid(raise_exception=True)
-		serializer.save()
-		return Response({"detail": "Password has been reset with the new password.Please re-login "})
-
+		if serializer.is_valid(raise_exception=True):
+			serializer.save()
+			return Response({"detail": "Password has been reset with the new password.Please re-login "},status=status.HTTP_200_OK)
+		return Response({"detail": "令牌失效或者过期，更改失败"},status=status.HTTP_403_FORBIDDEN)
 
 class PasswordChange(generics.GenericAPIView):
 	'''
@@ -185,4 +207,4 @@ class PasswordChange(generics.GenericAPIView):
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		serializer.save()
-		return Response({"detail": "New password has been saved."})
+		return Response({"detail": "New password has been saved."},status=status.HTTP_200_OK)

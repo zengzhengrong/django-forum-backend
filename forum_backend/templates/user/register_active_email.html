@@ -1,0 +1,12 @@
+{% load i18n %}{% autoescape on %}
+{% blocktrans %} {{ username }} welcome sign up {{ site_name }}.{% endblocktrans %}
+
+{% trans "Please go to the following page to active your account:" %}
+
+{{ protocol }}://{{ domain }}{% url 'register_confirm' signature=signature %}
+
+{% trans "If you're not registered,Please ignore! Thanks for using our site!" %}
+
+{% blocktrans %}The {{ site_name }} team{% endblocktrans %}
+
+{% endautoescape %}
