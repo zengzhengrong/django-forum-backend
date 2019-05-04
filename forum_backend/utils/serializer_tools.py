@@ -9,7 +9,7 @@ class CommentTargetSerializer(object):
         if model_class.__name__ == 'Comment':
             user = object.user
             data = {
-                'user':user.username,
+                'user':user.username if user else 'None',
                 'content':object.content,
                 'nested':object.nested,
                 'voted':object.voted
@@ -17,7 +17,7 @@ class CommentTargetSerializer(object):
         if model_class.__name__ == 'Post':
             user = object.author
             data = {
-                'user':user.username,
+                'user':user.username if user else 'None',
                 'title':object.title,
                 'views':object.views,
                 'pinned':object.pinned,

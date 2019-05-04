@@ -32,6 +32,8 @@ def ApiRoot(request,format=None):
         'authentication':{
             'login':reverse('user:user-login',request=request,format=format),
             'logout':reverse('user:user-logout',request=request,format=format),
+            'register':reverse('user:user-register',request=request,format=format),
+            'register-active-confirm':reverse('user:user-register-active-confirm',request=request,format=format),
             'send-reset-password-email':reverse('user:user-password-reset',request=request,format=format),
             'reset-password-confirm':reverse('user:user-password-confirm',request=request,format=format),
             'password-change':reverse('user:user-password-change',request=request,format=format)

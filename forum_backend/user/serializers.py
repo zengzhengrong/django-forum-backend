@@ -9,7 +9,7 @@ from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode as uid_decoder
 from django.contrib.auth.tokens import default_token_generator
 from .models import UserProfile
-from django.core.signing import TimestampSigner
+from utils.signer import signer,SignatureExpired,BadSignature
 
 User = get_user_model()
 
@@ -121,14 +121,17 @@ class LoginSerializer(serializers.Serializer):
                 pass
         if user:
             if not user.is_active:
-                msg = _('User account is disabled.')
-                raise exceptions.ValidationError(msg)
+                attrs['user'] = user
+                attrs['active'] = False
+                # msg = _('User account is disabled.')
+                # raise exceptions.ValidationError(msg)
+                return attrs
         else:
-
             msg = _('Unable to log in with provided credentials.')
             raise exceptions.ValidationError(msg)
 
         attrs['user'] = user
+        attrs['active'] = True
         return attrs
 
 
@@ -186,24 +189,24 @@ class VerifyRegisterEmailSerializer(serializers.Serializer):
     def validate(self,data):
         signature = data.get('signature',None)
         if not signature:
-            return serializers.ValidationError('请输入有效参数')
-        sign = TimestampSigner()
+            raise serializers.ValidationError('请输入有效参数')
         try:
-            username = sign.unsign(signature,max_age=10)
-            print(username)
+            username = signer.unsign(signature,max_age=600)
             self.username = username
-        except Exception as e:
-            print(e)
-            return serializers.ValidationError('签名验证失败')
+        except (BadSignature,SignatureExpired) as e:
+            # print(e)
+            raise serializers.ValidationError('签名验证失败')
         return data
     
     def save(self):
-        print(self.username)
         user= UserModel.objects.get(username=self.username)
         if user:
             user.is_active = True
             user.save()
         return user
+class ActiveConfirmSerilizer(serializers.Serializer):
+    message = serializers.CharField()
+    # url = serializers.HyperlinkedIdentityField(view_name='')
 
 class PasswordResetSerializer(serializers.Serializer):
     """
@@ -319,6 +322,7 @@ class JWTSerializer(serializers.Serializer):
     """
     Serializer for JWT authentication.
     """
+    message = serializers.CharField()
     token = serializers.CharField()
     user = serializers.SerializerMethodField()
 

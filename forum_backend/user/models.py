@@ -23,7 +23,7 @@ from django.contrib.auth.signals import user_logged_in
 
 class UserProfile(TimeFramedModel,TimeStampedModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,related_name='profile',on_delete=models.SET_NULL,null=True,verbose_name='用户')
-    nickname = models.CharField(max_length=50, unique=True,verbose_name='昵称')
+    nickname = models.CharField(max_length=50, blank=True,null=True,verbose_name='昵称')
     avatar = ProcessedImageField(upload_to='avatar',
                                  default='avatar/default.png', 
                                  processors=[ResizeToFill(85,85)],
@@ -42,7 +42,7 @@ class UserProfile(TimeFramedModel,TimeStampedModel):
         ordering = ['-created']
 
     def __str__(self):
-        return self.user.username
+        return self.user.username if self.user else 'None'
 
 
     

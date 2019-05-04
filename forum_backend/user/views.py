@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from .serializers import (UserSerializer,UserProfileSerializer,LoginSerializer,JWTSerializer,
 						RegisterSerializer,PasswordResetSerializer,PasswordResetConfirmSerializer,
-						PasswordChangeSerializer,VerifyRegisterEmailSerializer)
+						PasswordChangeSerializer,VerifyRegisterEmailSerializer,ActiveConfirmSerilizer)
 from user.permissions import IsUserOwnerOrReadOnly ,IsAdmin
 from user.models import UserProfile
 from rest_framework_jwt.settings import api_settings
@@ -17,9 +17,10 @@ from utils.tasks import send_active_email
 # from rest_framework_jwt.serializers import JSONWebTokenSerializer
 from rest_framework_jwt.settings import api_settings as jwt_settings
 from datetime import datetime, timedelta
-from django.core.signing import TimestampSigner
+from utils.signer import signer
 
 User = get_user_model()
+
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -66,23 +67,40 @@ class Login(generics.GenericAPIView):
 		django_login(self.request, self.user)
 
 	def login(self):
-		self.user = self.serializer.validated_data['user']
-		self.token = jwt_encode(self.user)
-		self.process_login()
+		self.user = self.serializer.validated_data.get('user')
+		self.is_active = self.serializer.validated_data.get('active')
+		if self.is_active:
+			self.token = jwt_encode(self.user)
+			self.process_login()
 
 	def get_response(self):
-		serializer_class = JWTSerializer
-		data = {
-				'user': self.user,
-				'token': self.token
-				}
-		serializer = serializer_class(instance=data,context={'request': self.request})
-		response = Response(serializer.data, status=status.HTTP_200_OK)
+		if self.is_active is False:
+			serializer_class = ActiveConfirmSerilizer
+			data = {
+					'message':'登陆失败:您的账号未激活！激活邮件已发送至您的注册邮箱'
+					}
+			serializer = serializer_class(instance=data)
+			signature = Register.generate_signature(self.user.username)
+			send_active_email(self.user,signature)
+			return Response(serializer.data,status=status.HTTP_403_FORBIDDEN)
 
-		if jwt_settings.JWT_AUTH_COOKIE:
-			expiration = (datetime.utcnow() + jwt_settings.JWT_EXPIRATION_DELTA)
-			response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,self.token,expires=expiration,httponly=True)
-		return response
+		elif (self.is_active and self.user):
+			serializer_class = JWTSerializer
+			data = {
+					'message':'登陆成功',
+					'user': self.user,
+					'token': self.token
+					}
+			serializer = serializer_class(instance=data,context={'request': self.request})
+			response = Response(serializer.data, status=status.HTTP_200_OK)
+
+			if jwt_settings.JWT_AUTH_COOKIE:
+				expiration = (datetime.utcnow() + jwt_settings.JWT_EXPIRATION_DELTA)
+				response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,self.token,expires=expiration,httponly=True)
+			return response
+		
+		data = {'message':'未知错误'}
+		return Response(data,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 	def post(self, request, *args, **kwargs):
 		self.request = request
@@ -119,6 +137,7 @@ class Register(generics.CreateAPIView):
 
 	def get_response_data(self, user):
 		data = {
+			'message':'激活邮件已发至你的注册邮箱',
 			'user': user,
 			'token': self.token
 		}
@@ -141,8 +160,8 @@ class Register(generics.CreateAPIView):
 		self.token = jwt_encode(user)
 		return user
 
-	def generate_signature(self,username):
-		signer = TimestampSigner(salt='extra') # 加盐
+	@staticmethod
+	def generate_signature(username):
 		signature = signer.sign(username)
 		print(signature)
 		return signature

@@ -39,4 +39,4 @@ class Comment(TimeStampedModel):
         verbose_name_plural = "评论/回复/投票"
 
     def __str__(self):
-        return self.user.username
+        return self.user.username if self.user else 'None'

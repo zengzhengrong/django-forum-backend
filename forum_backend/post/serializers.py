@@ -5,7 +5,7 @@ from comment.models import Comment
 
 class PostSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='post:post-detail')
-    author = serializers.ReadOnlyField(source='author.username')
+    author = serializers.ReadOnlyField(source='author.username',allow_null=True)
     category = serializers.SlugRelatedField(queryset=Category.objects.all(),
                                             slug_field='name',
                                             allow_null=True)
