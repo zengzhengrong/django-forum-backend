@@ -165,3 +165,11 @@ OLD_PASSWORD_FIELD_ENABLED = True
 JWT_AUTH = {
     'JWT_AUTH_COOKIE': 'token',
 }
+
+# 配置Celery
+CELERY_BROKER_URL = 'redis://'
+#: Only add pickle to this list if your broker is secured
+#: from unwanted access (see userguide/security.html)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'redis://'
+CELERY_TASK_SERIALIZER = 'json'

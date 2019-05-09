@@ -7,7 +7,7 @@ os.environ.setdefault('FORKED_BY_MULTIPROCESSING','1')
 app = Celery('tasks',
              broker='redis://',
              backend='redis://',
-             include=['utils.tasks'])
+             include=['utils.celery_test'])
 
 # Optional configuration, see the application user guide.
 app.conf.update(

@@ -1,7 +1,6 @@
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.conf import settings
-from utils.celery import app
 
 def send_active_email(user,signature):
     '''
@@ -18,18 +17,6 @@ def send_active_email(user,signature):
     from_email = getattr(settings,'DEFAULT_FROM_EMAIL','example@example.com')
     target_email = [user.email]
     send_mail(subject,msg,from_email,target_email)
-
-@app.task
-def add(x,y):
-    return x+y
-
-@app.task
-def mul(x,y):
-    return x*y
-
-@app.task
-def xsum(numbers):
-    return sum(numbers)
 
 
 
