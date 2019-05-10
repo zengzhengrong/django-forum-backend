@@ -221,9 +221,18 @@ class PasswordResetSerializer(serializers.Serializer):
         self.reset_form = self.password_reset_form_class(data=self.initial_data)
         if not self.reset_form.is_valid():
             raise serializers.ValidationError(self.reset_form.errors)
-
         return value
 
+    def validate(self,data):
+        ''' 检查users是否有效'''
+        email = data.get('email')
+        users = tuple(self.reset_form.get_users(email))
+
+        if not users:
+            raise serializers.ValidationError('用户未激活或邮箱不存在')
+            
+        return data
+    
     def save(self):
         request = self.context.get('request')
         # Set some values to trigger the send_email method.
@@ -266,7 +275,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         return attrs
 
     def save(self):
-        print('to change passwrod')
         return self.set_password_form.save()
 
 class PasswordChangeSerializer(serializers.Serializer):
@@ -322,7 +330,7 @@ class JWTSerializer(serializers.Serializer):
     """
     Serializer for JWT authentication.
     """
-    message = serializers.CharField()
+    message = serializers.CharField(read_only=True)
     token = serializers.CharField()
     user = serializers.SerializerMethodField()
 

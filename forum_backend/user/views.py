@@ -13,11 +13,12 @@ from user.permissions import IsUserOwnerOrReadOnly ,IsAdmin
 from user.models import UserProfile
 from rest_framework_jwt.settings import api_settings
 from utils.jwt import jwt_encode
-from utils.tasks import send_active_email
+from user.tasks import preform_send_active_email
 # from rest_framework_jwt.serializers import JSONWebTokenSerializer
 from rest_framework_jwt.settings import api_settings as jwt_settings
 from datetime import datetime, timedelta
 from utils.signer import signer
+from threading import Thread
 
 User = get_user_model()
 
@@ -81,7 +82,10 @@ class Login(generics.GenericAPIView):
 					}
 			serializer = serializer_class(instance=data)
 			signature = Register.generate_signature(self.user.username)
-			send_active_email(self.user,signature)
+
+			# celery asyn task
+			preform_send_active_email(self.user,signature)
+
 			return Response(serializer.data,status=status.HTTP_403_FORBIDDEN)
 
 		elif (self.is_active and self.user):
@@ -148,22 +152,24 @@ class Register(generics.CreateAPIView):
 		serializer.is_valid(raise_exception=True)
 		user = self.perform_create(serializer)
 		headers = self.get_success_headers(serializer.data)
-		print(headers)
+		# print(headers)
 
 		return Response(self.get_response_data(user),status=status.HTTP_201_CREATED,headers=headers)
 
 	def perform_create(self, serializer):
 		user = serializer.save(self.request)
 		signature = self.generate_signature(user.username)
-		send_active_email(user,signature)
-		print('active email have been send')
+
+		# celery asyn task
+		preform_send_active_email(user,signature)
+
 		self.token = jwt_encode(user)
 		return user
 
 	@staticmethod
 	def generate_signature(username):
 		signature = signer.sign(username)
-		print(signature)
+		# print(signature)
 		return signature
 
 
@@ -194,8 +200,10 @@ class PasswordReset(generics.GenericAPIView):
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
 
-		serializer.save()
-		# Return the success message with OK HTTP status
+		# multithreading
+		t = Thread(target=serializer.save,name='reset-email')
+		t.start()
+
 		return Response({"detail": "Password reset e-mail has been sent."},status=status.HTTP_200_OK)
 
 
