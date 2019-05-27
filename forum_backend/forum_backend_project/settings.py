@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-
+import datetime
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,7 +25,7 @@ SECRET_KEY = 'z+t#k)!z6bi7nk&lv#-ppbf69y@u=wa5l+cx@de4=o!8$*&4!p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'utils.middleware.TokenCookieExpireMiddleware',
+    'utils.middleware.UserLogMiddleware',
 ]
 
 ROOT_URLCONF = 'forum_backend_project.urls'
@@ -137,6 +138,8 @@ AUTH_USER_MODEL = 'auth.user'
 AUTH_USER_ADMINS = ['zzr']
 
 REST_FRAMEWORK = {
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    # 'PAGE_SIZE': 2,
     'DEFAULT_PERMISSION_CLASSES': (
         # 'rest_framework.permissions.IsAuthenticated',
     ),
@@ -164,6 +167,7 @@ OLD_PASSWORD_FIELD_ENABLED = True
 
 JWT_AUTH = {
     'JWT_AUTH_COOKIE': 'token',
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=600)
 }
 
 # 配置Celery

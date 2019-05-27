@@ -8,9 +8,10 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from .serializers import (UserSerializer,UserProfileSerializer,LoginSerializer,JWTSerializer,
 						RegisterSerializer,PasswordResetSerializer,PasswordResetConfirmSerializer,
-						PasswordChangeSerializer,VerifyRegisterEmailSerializer,ActiveConfirmSerilizer)
+						PasswordChangeSerializer,VerifyRegisterEmailSerializer,ActiveConfirmSerilizer,
+						UserLogSerializer)
 from user.permissions import IsUserOwnerOrReadOnly ,IsAdmin
-from user.models import UserProfile
+from user.models import UserProfile,UserLog
 from rest_framework_jwt.settings import api_settings
 from utils.jwt import jwt_encode
 from user.tasks import preform_send_active_email
@@ -19,6 +20,7 @@ from rest_framework_jwt.settings import api_settings as jwt_settings
 from datetime import datetime, timedelta
 from utils.signer import signer
 from threading import Thread
+from user.pagination import UserLogPagination
 
 User = get_user_model()
 
@@ -26,6 +28,9 @@ User = get_user_model()
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+
+
+
 
 class UserList(generics.ListAPIView):
 	"""
@@ -35,6 +40,28 @@ class UserList(generics.ListAPIView):
 	serializer_class = UserSerializer
 	permission_classes = (IsAdmin,)
 	
+class UserLogList(generics.ListAPIView):
+	"""
+	获取用户日志列表
+	"""
+	queryset = UserLog.objects.all()
+	serializer_class = UserLogSerializer
+	permission_classes = (IsAdmin,)
+	pagination_class = UserLogPagination
+
+	def get(self, request, *args, **kwargs):
+		user_id = kwargs.get('pk')
+
+		if user_id == 0:
+			# 0 表示查询匿名用户
+			self.queryset = UserLog.objects.filter(username='AnonymousUser').all()
+			
+		if user_id and user_id != 0:
+			user = User.objects.get(id=user_id)
+			self.queryset = UserLog.objects.filter(username=user.username).all()
+
+
+		return self.list(request, *args, **kwargs)
 
 
 class UserDetail(generics.RetrieveUpdateAPIView):

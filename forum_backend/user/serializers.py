@@ -8,10 +8,26 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode as uid_decoder
 from django.contrib.auth.tokens import default_token_generator
-from .models import UserProfile
+from .models import UserProfile , UserLog
 from utils.signer import signer,SignatureExpired,BadSignature
 
 User = get_user_model()
+
+class UserLogSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = UserLog
+        fields = '__all__'
+
+
+    def get_username(self,obj):
+        if obj.username != 'AnonymousUser':
+            user = User.objects.get(username=obj.username)
+            data = UserSimpleSerializer(user).data
+            return data
+        return obj.username
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
 

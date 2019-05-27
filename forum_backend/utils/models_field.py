@@ -1,6 +1,8 @@
 import ast
+import pprint
+import json
 from django.db import models
- 
+
 class ListField(models.TextField):
     '''
     用于将数据库的值转换为python的list对象
@@ -12,6 +14,11 @@ class ListField(models.TextField):
     description = "Stores a python list"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def from_db_value(self, value, expression, connection):
+        if value is None:
+            return value
+        return value
  
     def to_python(self, value):
         if not value:
@@ -32,7 +39,33 @@ class ListField(models.TextField):
         value = self.value_from_object(obj)
         return self.get_db_prep_value(value)
 
+class DictField(models.TextField):
 
+    description = "Stores a python dict"
+ 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+ 
+    def from_db_value(self, value, expression, connection):
+        # to dict
+        if value is None:
+            return value
+            
+        return json.loads(value)
+
+    def to_python(self, value):
+        # to dict
+        if value is None:
+            return value
+        value = super().to_python(self,value)
+        return json.loads(value)
+
+    def get_prep_value(self, value):
+        # to string
+        if value is None:
+            return value
+        return value
+        
 class DictListField(ListField):
 
     description = "Stores a python list with dict"
@@ -40,7 +73,11 @@ class DictListField(ListField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
  
-     
+    def from_db_value(self, value, expression, connection):
+        if value is None:
+            return value
+        return value
+
     def to_python(self, value):
         value = super().to_python(self,value)
         if not value:
@@ -54,10 +91,11 @@ class DictListField(ListField):
     def get_prep_value(self, value):
         if value is None:
             return value
-        print(value)
-        print(type(value))
+
         for item in value:
             if not isinstance(item,dict):
                 raise TypeError('The Field must be a list nesting in dict')
 
         return str(value)
+
+
