@@ -30,7 +30,7 @@ class Notification(TimeStampedModel,StatusModel,SoftDeletableModel):
         verbose_name_plural = "通知"
 
     def __str__(self):
-        return self.sender.username
+        return self.sender.username if self.sender else 'None'
 
 
 

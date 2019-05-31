@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login,logout,authenticate
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
-from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode as uid_decoder
 from django.contrib.auth.tokens import default_token_generator
@@ -106,7 +105,7 @@ class LoginSerializer(serializers.Serializer):
             user = self.authenticate(username=username, password=password)
 
         else:
-            msg = _('Must include either "username" or "email" and "password".')
+            msg = ('请输入用户名(或邮箱)和密码')
             raise exceptions.ValidationError(msg)
         print(user)
         return user
@@ -139,11 +138,11 @@ class LoginSerializer(serializers.Serializer):
             if not user.is_active:
                 attrs['user'] = user
                 attrs['active'] = False
-                # msg = _('User account is disabled.')
+                # msg = ('User account is disabled.')
                 # raise exceptions.ValidationError(msg)
                 return attrs
         else:
-            msg = _('Unable to log in with provided credentials.')
+            msg = ('无法登录')
             raise exceptions.ValidationError(msg)
 
         attrs['user'] = user
@@ -161,23 +160,23 @@ class RegisterSerializer(serializers.Serializer):
     def validate_username(self, username):
         repeat_username = UserModel.objects.filter(username__exact=username).exists()
         if username and repeat_username:
-            raise serializers.ValidationError(_("A user is already registered with this username."))
+            raise serializers.ValidationError(('该用户名已经被注册'))
         return username
 
     def validate_email(self, email):
         repeat_email = UserModel.objects.filter(email=email).exists()
         if email and repeat_email:
-            raise serializers.ValidationError(_("A user is already registered with this e-mail address."))
+            raise serializers.ValidationError(('该邮箱已被注册'))
         return email
 
     def validate_password1(self, password):
         if len(password) < 6:
-            raise serializers.ValidationError(_("The passwrod is too short"))
+            raise serializers.ValidationError(("密码太短，需大于等于6个字符"))
         return password
 
     def validate(self, data):
         if data['password1'] != data['password2']:
-            raise serializers.ValidationError(_("The two password fields didn't match."))
+            raise serializers.ValidationError(('确认密码和密码不匹配'))
         return data
 
     def get_cleaned_data(self):
@@ -323,7 +322,7 @@ class PasswordChangeSerializer(serializers.Serializer):
         )
 
         if all(invalid_password_conditions):
-            err_msg = _("Your old password was entered incorrectly. Please enter it again.")
+            err_msg = ('旧密码输入错误，请重试')
             raise serializers.ValidationError(err_msg)
         return value
 

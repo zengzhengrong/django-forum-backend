@@ -25,6 +25,7 @@ from rest_framework.reverse import reverse
 def ApiRoot(request,format=None):
 	return Response({
 		'users':reverse('user:user-list',request=request,format=format),
+        'user-logs':reverse('user:user-logs',request=request,format=format),
         'categorys':reverse('category:category-list',request=request,format=format),
 		'posts':reverse('post:post-list',request=request,format=format),
         'notification':reverse('notification:notification-list',request=request,format=format),

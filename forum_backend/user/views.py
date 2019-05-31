@@ -85,7 +85,7 @@ class UserDetail(generics.RetrieveUpdateAPIView):
 class Login(generics.GenericAPIView):
 	'''
 	二选一登陆方式:username或者email  
-	生成token的有效期为300s(5分钟)
+	生成token的有效期为600s(5分钟)
 	当token失效时，服务端后端session（这个Django默认是7天）也随之删除
 	'''
 	permission_classes = (permissions.AllowAny,)
@@ -153,7 +153,7 @@ class Logout(views.APIView):
 	def logout(self, request):
 		django_logout(request)
 
-		response = Response({"detail": "Successfully logged out."},status=status.HTTP_200_OK)
+		response = Response({"detail": "成功登出"},status=status.HTTP_200_OK)
 		if jwt_settings.JWT_AUTH_COOKIE:
 			response.delete_cookie(jwt_settings.JWT_AUTH_COOKIE)
 		return response
@@ -213,7 +213,7 @@ class VerifyRegisterEmail(generics.GenericAPIView):
 		serializer.is_valid(raise_exception=True)
 		
 		serializer.save()
-		return Response({'detali':'Your account have been active suceess'},status=status.HTTP_200_OK)
+		return Response({'detali':'你的用户已激活成功'},status=status.HTTP_200_OK)
 
 class PasswordReset(generics.GenericAPIView):
 	'''
@@ -231,7 +231,7 @@ class PasswordReset(generics.GenericAPIView):
 		t = Thread(target=serializer.save,name='reset-email')
 		t.start()
 
-		return Response({"detail": "Password reset e-mail has been sent."},status=status.HTTP_200_OK)
+		return Response({"detail": "密码重置邮件已发送，请查收"},status=status.HTTP_200_OK)
 
 
 class PasswordResetConfirm(generics.GenericAPIView):
@@ -246,7 +246,7 @@ class PasswordResetConfirm(generics.GenericAPIView):
 		serializer = self.get_serializer(data=request.data)
 		if serializer.is_valid(raise_exception=True):
 			serializer.save()
-			return Response({"detail": "Password has been reset with the new password.Please re-login "},status=status.HTTP_200_OK)
+			return Response({"detail": "密码已重置，请重新登录"},status=status.HTTP_200_OK)
 		return Response({"detail": "令牌失效或者过期，更改失败"},status=status.HTTP_403_FORBIDDEN)
 
 class PasswordChange(generics.GenericAPIView):
@@ -261,4 +261,4 @@ class PasswordChange(generics.GenericAPIView):
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		serializer.save()
-		return Response({"detail": "New password has been saved."},status=status.HTTP_200_OK)
+		return Response({"detail": "新密码已生效"},status=status.HTTP_200_OK)
