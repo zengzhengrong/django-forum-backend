@@ -6,7 +6,7 @@ from category.serializers import CategorySerializer
 from category.permissions import IsAdmin
 from datetime import datetime
 from rest_framework.response import Response
-import ast
+from utils.models_field import json,TimeJsonEncoder
 # Create your views here.
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -17,19 +17,19 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+        # 更新历史记录
         data = {
-            'datetime':str(datetime.now()),
+            'datetime':datetime.now(),
             'name':instance.name
         }
-        
+
         if not instance.history: 
             instance.history = []
             instance.history.append(data)
         else:
-            instance.history = ast.literal_eval(instance.history)
-            instance.history.append(data)
+            instance.history = json.dumps(instance.history,TimeJsonEncoder)
 
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial) # 更新数据
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 

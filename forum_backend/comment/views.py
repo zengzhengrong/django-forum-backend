@@ -72,8 +72,7 @@ class CommentList(generics.ListCreateAPIView):
             ct = ContentType.objects.get_for_model(Post)
             comments = Comment.objects.filter(content_type=ct,object_id=ct_id)
             total = get_total(comments)
-            print(len(total))
-            print(type(total))
+            # print(len(total))
             self.queryset = total
         return self.list(request, *args, **kwargs)
 

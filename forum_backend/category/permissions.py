@@ -2,7 +2,7 @@ from rest_framework import permissions
 
 
 class IsAdmin(permissions.BasePermission):
-    """只有UserAdmin才有权限资格进行get a list of user"""
+    """只有UserAdmin才有权限资格进行"""
     
     def has_permission(self, request, view):
     	# SAFE_METHODS = ('GET','HEAD','OPTIONS') 也就是说这几个请求不需要通过这个类的额外许可

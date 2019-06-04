@@ -15,7 +15,7 @@ from django.conf import settings
 3.content 评论内容  
 4.content_type 外键指向Django的ContentType  
 5.object_id 表示content_type的模型ID  
-6.related_obj  (为空时表示回复帖子，不为则其他事件)根据content_type和content_type_id生成通用外键  
+6.related_obj 根据content_type和content_type_id生成通用外键  
 7.is_comment_nested 是否为评论内联  
 8.is_comment_vote 是否为投票  
 9.created_time 创建时间  

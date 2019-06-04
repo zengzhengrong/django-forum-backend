@@ -57,22 +57,21 @@ class UserLogMiddleware:
         用于忽略某些请求，不生成用户日志
         当parent=True ,则当前路径含有在屏蔽列表路径中的任意一部分都不会记录日志
         '''
-        response = self.get_response(request)
 
         if self.ignore_re_paths:
             for re_path in self.ignore_re_paths:
                 pattern = re.compile(re_path)
                 math = pattern.match(request.path)
                 if math:
-                    return response
+                    return self.get_response(request)
 
         if request.path in self.ignore_paths:
-            return response
+            return self.get_response(request)
 
         if parent is True and request.path != '/':
             for path in self.ignore_paths:
                 if request.path in path:
-                    return response
+                    return self.get_response(request)
 
     def get_request_data(self,request):
         if request.GET:
