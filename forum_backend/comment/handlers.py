@@ -4,26 +4,26 @@ from comment.models import Comment
 from django.conf import settings
 from django.contrib.auth import get_user_model
 '''
-        1. 帖子被评论，帖子作者收到通知，通知模型各字段含义为：
-        receiver：帖子作者
-        sender：回复者
-        target：帖子
-        action：新评论
-        verb: 'comment'
-        2. 帖子的回复被其他人回复，即回复别人的回复，被回复者收到通知：
-        receiver：被回复者
-        sender：回复者
-        target：帖子
-        action：新回复
-        verb: 'respond'
-        3. 回复被点赞：
-        receiver：被赞者
-        sender：回复者
-        target：被赞的回复
-        action：被赞的回复所属的帖子
-		4.可以选择收到所有回复
-		在settings中设定AUTH_USER_ADMINS，不设置即不通知管理员
-        verb: 'like'
+1. 帖子被评论，帖子作者收到通知，通知模型各字段含义为：
+receiver：帖子作者
+sender：回复者
+target：帖子
+action：新评论
+verb: 'comment'
+2. 帖子的回复被其他人回复，即回复别人的回复，被回复者收到通知：
+receiver：被回复者
+sender：回复者
+target：帖子
+action：新回复
+verb: 'respond'
+3. 回复被点赞：
+receiver：被赞者
+sender：回复者
+target：被赞的回复
+action：被赞的回复所属的帖子
+4.可以选择收到所有回复
+在settings中设定AUTH_USER_ADMINS，不设置即不通知管理员
+verb: 'like'
 '''
 User = get_user_model()
 

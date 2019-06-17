@@ -3,6 +3,7 @@ from model_utils.models import TimeStampedModel
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey,GenericRelation
 from django.conf import settings
+from utils.models_field import DictField
 # Create your models here.
 
 '''
@@ -31,6 +32,7 @@ class Comment(TimeStampedModel):
     nested = models.BooleanField(default=False,verbose_name='评论内联性质')
     voted = models.BooleanField(default=False,verbose_name='投票性质')
     sub_comment = GenericRelation('Comment',content_type_field='content_type',object_id_field='object_id',verbose_name='子评论')
+    relay_source = DictField(blank=True,null=True,verbose_name='转发源')
     
     class Meta:
         

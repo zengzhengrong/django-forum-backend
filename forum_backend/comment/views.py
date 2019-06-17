@@ -1,3 +1,4 @@
+import json
 from rest_framework import generics,permissions
 from comment.models import Comment
 from comment.serializers import CommentSerializer
@@ -59,7 +60,10 @@ def get_subcomments(comments,total=None,q=None):
 
 
 class CommentList(generics.ListCreateAPIView):
-
+    '''
+    获取某个帖子下的comments
+    params post_id
+    '''
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
@@ -76,14 +80,51 @@ class CommentList(generics.ListCreateAPIView):
             self.queryset = total
         return self.list(request, *args, **kwargs)
 
-    def perform_create(self, serializer):
+    def post(self, request, *args, **kwargs):
+        '''
+        转发
+        params from_type = 'post' or 'comment' (帖子或者评论类型)
+        params from_id (帖子或者评论id)
+        '''
+        params = self.request.query_params
+        from_object_type = params.get('from_type')
+        from_object_id = params.get('from_id')
+        print (from_object_type,type(from_object_type))
+        print (from_object_id,type(from_object_id))
+
+        if from_object_type not in ['post','comment']:
+            from_object_type = None
+
+        if from_object_id and from_object_type:
+            if from_object_type == 'post':
+                from_object = Post.objects.filter(id=from_object_id).first()
+            if from_object_type == 'comment':
+                from_object = Comment.objects.filter(id=from_object_id).first()
+
+        kwargs.update({'from_object':from_object})
+        return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        from_object = kwargs.get('from_object')
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer,from_object)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer,from_object):
+        if from_object:
+            data = {
+                'type':from_object.__class__.__name__,
+                'id':from_object.id
+            }
+            serializer_data = json.dumps(data)
+            serializer.save(relay_source=serializer_data)
         serializer.save(user=self.request.user)
 
 
-
-
-
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
+
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAdminUser,)
@@ -95,3 +136,8 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
             'message':'成功删除评论'
         }
         return Response(data,status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+

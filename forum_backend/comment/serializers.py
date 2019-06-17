@@ -4,6 +4,7 @@ from category.models import Category
 from comment.models import Comment
 from django.contrib.contenttypes.models import ContentType
 from utils.serializer_tools import CommentTargetSerializer
+from notification.serializers import find_post
 
 class CommentSerializer(serializers.ModelSerializer):
     # commmet_user_url = serializers.HyperlinkedIdentityField(view_name='user:user-detail',
@@ -13,7 +14,7 @@ class CommentSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     content_type_id = serializers.ReadOnlyField(source='content_type.id',help_text='内容类型')
     target = serializers.SerializerMethodField(help_text='评论目标对象数据')
-    
+    relay_source = serializers.SerializerMethodField(help_text='转发源')
     # category = serializers.SlugRelatedField(queryset=Category.objects.all(),
     #                                         slug_field='name',
     #                                         allow_null=True)
@@ -44,3 +45,55 @@ class CommentSerializer(serializers.ModelSerializer):
         if model_class.__name__ == 'Post':
             message='评论帖子'
         return message
+
+    def get_relay_source(self,obj):
+        from_object = self._context.get('request').data.get('from_object') # POST 请求所响应需要显示评论的转发
+        if from_object:
+            print(from_object)
+        # GET request will be processing for below
+        relay_data = obj.relay_source
+        if relay_data:
+            relay_type ,relay_id = relay_data.get('type'),relay_data.get('id')
+            # if the model type is no Post or Comment model return None
+            if relay_type not in ['Post','Comment']:
+                return None
+            if relay_type == 'Post':
+                post = Post.objects.filter(id=relay_id).first()
+                serializer = RelayPostSerializer(post,context={'request': self._context.get('request')})
+                return serializer.data
+            if relay_type == 'Comment':
+                comment = Comment.objects.filter(id=relay_id).first()
+                serializer = RelayCommentSerializer(comment)
+                return serializer.data
+
+        return None
+
+
+class RelayPostSerializer(serializers.ModelSerializer):
+
+    url = serializers.HyperlinkedIdentityField(view_name='post:post-detail')
+    author = serializers.ReadOnlyField(source='author.username',allow_null=True)
+
+    class Meta:
+        model = Post
+        fields = ['id','url','author','category','title','body','created']
+
+
+class RelayCommentSerializer(serializers.ModelSerializer):
+
+    # url = serializers.HyperlinkedIdentityField(view_name='post:post-detail')
+    user = serializers.ReadOnlyField(source='user.username',allow_null=True)
+    post = serializers.SerializerMethodField(help_text='所属帖子')
+
+    class Meta:
+        model = Comment
+        fields = ['id','user','post','body','created']
+
+    def get_post(self,obj):
+        print (obj)
+        post = find_post(obj)
+        return None
+
+
+
+

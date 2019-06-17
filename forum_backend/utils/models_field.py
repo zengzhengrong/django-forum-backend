@@ -22,6 +22,8 @@ class TimeJsonDecoder(json.JSONDecoder):
     解决json.loads 无法反序列化时间的问题
     to python datetime object
     '''
+    def __init__(self, *args, **kwargs):
+        super().__init__( *args, **kwargs)
     
     def decode(self, s, _w=json.decoder.WHITESPACE.match):
         """Return the Python representation of ``s`` (a ``str`` instance
@@ -131,7 +133,7 @@ class DictListField(models.TextField):
         # to python dict
         if value is None:
             return value
-        return json.loads(value,cls=TimeJsonDecoder)
+        return json.loads(value,cls=TimeJsonDecoder) # 如果在这里用TimeJsonDecoder会导致直接序列化显示是个datetime对象
 
     def to_python(self, value):
         # to python dict
@@ -148,7 +150,6 @@ class DictListField(models.TextField):
         if value is None:
             return value
         return str(value)
-
 
 if __name__ == "__main__":
     data = [{'sd':{'ds':datetime.now(),'sds':{'sdss':datetime.now()}},'123':'321','000':111},{'dsdsd':1321},'213123',3213123]
