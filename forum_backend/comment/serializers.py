@@ -3,6 +3,7 @@ from post.models import Post
 from category.models import Category
 from comment.models import Comment
 from django.contrib.contenttypes.models import ContentType
+from rest_framework.reverse import reverse
 from utils.serializer_tools import CommentTargetSerializer
 from notification.serializers import find_post
 
@@ -35,7 +36,7 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_target(self,obj):
         model_class = self.target_model_class(obj)
         target_obj = model_class.objects.get(id=obj.object_id)
-        data = CommentTargetSerializer.payload(target_obj)
+        data = CommentTargetSerializer.payload(target_obj,obj.content_type.id)
         return data
 
     def get_description(self,obj):
@@ -47,23 +48,34 @@ class CommentSerializer(serializers.ModelSerializer):
         return message
 
     def get_relay_source(self,obj):
-        from_object = self._context.get('request').data.get('from_object') # POST 请求所响应需要显示评论的转发
-        if from_object:
-            print(from_object)
-        # GET request will be processing for below
-        relay_data = obj.relay_source
+        request = self._context.get('request')
+        # POST request processing below
+        if request.method == 'POST':
+            from_object = request.from_object # POST 请求所响应需要显示评论的转发
+            if from_object:
+                if from_object.__class__.__name__ == 'Post':
+                    serializer = RelayPostSerializer(from_object,context={'request': request})
+                    return serializer.data
+                if from_object.__class__.__name__ == 'Comment':
+                    serializer = RelayCommentSerializer(from_object,context={'request': request})
+                    return serializer.data
+                return None
+        # GET request will be processing in below
+        relay_data = obj.relay_source # for above use json.loads(obj.relay_source) in POST request as well 
         if relay_data:
+            if isinstance(relay_data,str):
+                return None
             relay_type ,relay_id = relay_data.get('type'),relay_data.get('id')
             # if the model type is no Post or Comment model return None
             if relay_type not in ['Post','Comment']:
                 return None
             if relay_type == 'Post':
                 post = Post.objects.filter(id=relay_id).first()
-                serializer = RelayPostSerializer(post,context={'request': self._context.get('request')})
+                serializer = RelayPostSerializer(post,context={'request': request})
                 return serializer.data
             if relay_type == 'Comment':
                 comment = Comment.objects.filter(id=relay_id).first()
-                serializer = RelayCommentSerializer(comment)
+                serializer = RelayCommentSerializer(comment,context={'request': request})
                 return serializer.data
 
         return None
@@ -73,7 +85,9 @@ class RelayPostSerializer(serializers.ModelSerializer):
 
     url = serializers.HyperlinkedIdentityField(view_name='post:post-detail')
     author = serializers.ReadOnlyField(source='author.username',allow_null=True)
-
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            slug_field='name',
+                                            allow_null=True)
     class Meta:
         model = Post
         fields = ['id','url','author','category','title','body','created']
@@ -87,12 +101,16 @@ class RelayCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id','user','post','body','created']
+        fields = ['id','user','post','content','created']
 
     def get_post(self,obj):
-        print (obj)
+        request = self._context.get('request')
         post = find_post(obj)
-        return None
+        data = {
+            'url':reverse('post:post-detail',args=[obj.id],request=request),
+            'title':post.title
+        }
+        return data
 
 
 

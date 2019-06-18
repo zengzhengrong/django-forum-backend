@@ -107,7 +107,7 @@ class LoginSerializer(serializers.Serializer):
         else:
             msg = ('请输入用户名(或邮箱)和密码')
             raise exceptions.ValidationError(msg)
-        print(user)
+        # print(user)
         return user
 
     def validate(self, attrs):
@@ -187,8 +187,6 @@ class RegisterSerializer(serializers.Serializer):
         }
 
     def save(self, request):
-        print(request)
-        print(request.data)
         self.cleaned_data = self.get_cleaned_data()
         username = request.data.get('username')
         password = request.data.get('password1')

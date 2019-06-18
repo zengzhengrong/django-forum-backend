@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-import json
 import re
 from django.contrib.auth import logout
 from django.utils import timezone
@@ -76,13 +74,13 @@ class UserLogMiddleware:
     def get_request_data(self,request):
         if request.GET:
             request_data = request.GET.items()
-            request_data = json.dumps(dict(request_data),ensure_ascii=False)
+            request_data = dict(request_data)
         elif request.POST:
             request_data = request.POST.items()
             request_data = dict(request_data)
             if request_data.get('password'):
                 request_data['password'] = '********' # 不显示密码
-            request_data = json.dumps(request_data,ensure_ascii=False)
+            request_data = request_data
         else:
             request_data = None
         return request_data
@@ -101,11 +99,13 @@ class UserLogMiddleware:
 
     def serializer_request_meta(self,meta):
         for key,word in meta.items():
-            meta[key] = str(word)
-        return json.dumps(meta,ensure_ascii=False)
+            if not isinstance(word,str):
+                meta[key] = str(word)
+        return meta
 
     def serializer_response_data(self,data):
-        return json.dumps(data,ensure_ascii=False)
+        # do someting to check vaild
+        return data
     
     def check_current_userlog(self,request):
         '''

@@ -52,8 +52,11 @@ class NotificationSerializer(serializers.ModelSerializer):
             return {'content': comment.content}
         elif obj.verb == 'comment':
             # 评论内容
-            comment = obj.action
+            comment = obj.action if obj.action else None
+            if not comment:
+                return None
             return {'content': comment.content}
+            
         elif obj.verb == 'respond':
             # 回复的内容
             comment = obj.action

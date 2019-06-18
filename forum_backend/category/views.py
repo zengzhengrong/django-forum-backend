@@ -6,7 +6,6 @@ from category.serializers import CategorySerializer
 from category.permissions import IsAdmin
 from datetime import datetime
 from rest_framework.response import Response
-from utils.models_field import json , TimeJsonEncoder
 # Create your views here.
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -27,7 +26,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         # 往后新增
         else:
             instance.history.append(data)
-        instance.history = json.dumps(instance.history,cls=TimeJsonEncoder)
+        instance.history = instance.history
 
         serializer = self.get_serializer(instance, data=request.data, partial=partial) # 更新数据
         serializer.is_valid(raise_exception=True)

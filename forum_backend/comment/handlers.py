@@ -71,6 +71,12 @@ def comment_handler(sender, instance, created, **kwargs):
 				notificaton.save()
 
 		if instance.user not in admins:
+			if instance.related_obj.__class__.__name__ == 'Post':
+				if instance.related_obj.author in admins: # 避免发帖者同时又是管理员时候重复接收不同类型的通知
+					return None
+			if instance.related_obj.__class__.__name__ == 'Comment':
+				if instance.related_obj.user in admins: # 避免被回复者同时又是管理员时候重复接收不同类型的通知
+					return None
 			for admin in admins:
 				message = instance.content
 				notificaton = Notification(sender=instance.user,

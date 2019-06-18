@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import ast
 import json
 import re
@@ -120,7 +121,7 @@ class DictField(models.TextField):
         # to string
         if value is None:
             return value
-        return str(value)
+        return json.dumps(value,cls=TimeJsonEncoder,ensure_ascii=False)
         
 class DictListField(models.TextField):
 
@@ -133,6 +134,7 @@ class DictListField(models.TextField):
         # to python dict
         if value is None:
             return value
+        # print (value)
         return json.loads(value,cls=TimeJsonDecoder) # 如果在这里用TimeJsonDecoder会导致直接序列化显示是个datetime对象
 
     def to_python(self, value):
@@ -149,7 +151,7 @@ class DictListField(models.TextField):
         # to string
         if value is None:
             return value
-        return str(value)
+        return json.dumps(value,cls=TimeJsonEncoder,ensure_ascii=False)
 
 if __name__ == "__main__":
     data = [{'sd':{'ds':datetime.now(),'sds':{'sdss':datetime.now()}},'123':'321','000':111},{'dsdsd':1321},'213123',3213123]

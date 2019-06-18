@@ -1,4 +1,3 @@
-import json
 from rest_framework import generics,permissions
 from comment.models import Comment
 from comment.serializers import CommentSerializer
@@ -89,8 +88,8 @@ class CommentList(generics.ListCreateAPIView):
         params = self.request.query_params
         from_object_type = params.get('from_type')
         from_object_id = params.get('from_id')
-        print (from_object_type,type(from_object_type))
-        print (from_object_id,type(from_object_id))
+        # print (from_object_type,type(from_object_type))
+        # print (from_object_id,type(from_object_id))
 
         if from_object_type not in ['post','comment']:
             from_object_type = None
@@ -106,6 +105,7 @@ class CommentList(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         from_object = kwargs.get('from_object')
+        request.from_object = from_object # 将转发源的模型更新进request，用于post请求
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer,from_object)
@@ -118,8 +118,9 @@ class CommentList(generics.ListCreateAPIView):
                 'type':from_object.__class__.__name__,
                 'id':from_object.id
             }
-            serializer_data = json.dumps(data)
-            serializer.save(relay_source=serializer_data)
+            serializer_data = data
+            serializer.save(relay_source=serializer_data,user=self.request.user)
+            return None
         serializer.save(user=self.request.user)
 
 
