@@ -100,7 +100,7 @@ class CommentList(generics.ListCreateAPIView):
             if from_object_type == 'comment':
                 from_object = Comment.objects.filter(id=from_object_id).first()
 
-        kwargs.update({'from_object':from_object})
+            kwargs.update({'from_object':from_object})
         return self.create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):

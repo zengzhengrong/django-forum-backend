@@ -39,28 +39,44 @@ class NotificationSerializer(serializers.ModelSerializer):
     sender = UserSimpleSerializer()
     post = serializers.SerializerMethodField()
     comment = serializers.SerializerMethodField()
-
+    receiver = UserSimpleSerializer()
+    
     class Meta:
         model = Notification
         read_only_fields = ('sender','receiver','verb','message','action_content_type','action_object_id','target_content_type','target_object_id')
         fields = '__all__'
 
     def get_comment(self,obj):
+
+        if self.fields.get('message'):
+            print(True)
+            del self.fields['message'] # 重复显示，删掉
+        print(self.fields)
+        print(self.get_fields())
         if obj.verb == 'like':
             # 点赞目标回复的内容
             comment = obj.target
-            return {'content': comment.content}
+            return {
+                'id':comment.id,
+                'content': comment.content
+                }
         elif obj.verb == 'comment':
-            # 评论内容
+            # 被评论内容
             comment = obj.action if obj.action else None
             if not comment:
                 return None
-            return {'content': comment.content}
+            return {
+                'id':comment.id,
+                'content': comment.content
+                }
             
         elif obj.verb == 'respond':
-            # 回复的内容
+            # 被回复的内容
             comment = obj.action
-            return {'content': comment.content}
+            return {
+                'id':comment.id,
+                'content': comment.content
+                }
 
     def get_post(self,obj):
         if obj.verb == 'like':
