@@ -19,7 +19,7 @@ from post.models import Post,Category
 #     class Meta:
 #         model = Post
 #         fields = []
-class PostViewSets(viewsets.ModelViewSet):
+class PostViewSet(viewsets.ModelViewSet):
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer

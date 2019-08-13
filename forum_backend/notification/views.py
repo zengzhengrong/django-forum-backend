@@ -18,7 +18,8 @@ class NotificationViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         # 置获取当前用户认证的通知
-        # print(self.request)
+        print(self.request.session.items())
+        # print(dir(self.request.session))
         queryset = Notification.objects.filter(receiver=self.request.user).all()
         return queryset
 

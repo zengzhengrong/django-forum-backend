@@ -4,8 +4,41 @@ from django.utils import timezone
 from user.models import UserLog
 from utils.ip import get_ip_address_from_request
 from datetime import timedelta
+from django.urls import reverse,resolve
+
+class TokenCookieRenewalMiddleware:
+    '''
+    需要身份验证的请求通过后会自动更新（续签）token
+    '''
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # One-time configuration and initialization.
+
+    def __call__(self, request):
+        # Code to be executed for each request before
+        # the view (and later middleware) are called.
+        # token = request.COOKIES.get('token',None)
+        # if not token:
+        #     logout(request)
+        print(request.method)
+        print(request.scheme)
+        # print(reverse('user:user-detail')==request.path_info)
+        print(dir (resolve(request.path_info).func))
+        # print(resolve(request.path_info).func.actions)
+        print(dir(request))
+        response = self.get_response(request)
+        # print(response.content)
+        # print(dir(response))
+        # Code to be executed for each request/response after
+        # the view is called.
+
+        return response
 
 class TokenCookieExpireMiddleware:
+    '''
+    不存在/过期 token 会删除服务端会话
+    Expire Token delete session
+    '''
     def __init__(self, get_response):
         self.get_response = get_response
         # One-time configuration and initialization.
@@ -14,10 +47,9 @@ class TokenCookieExpireMiddleware:
         # Code to be executed for each request before
         # the view (and later middleware) are called.
         token = request.COOKIES.get('token',None)
+        response = self.get_response(request)
         if not token:
             logout(request)
-        response = self.get_response(request)
-
         # Code to be executed for each request/response after
         # the view is called.
 
@@ -54,6 +86,8 @@ class UserLogMiddleware:
         '''
         用于忽略某些请求，不生成用户日志
         当parent=True ,则当前路径含有在屏蔽列表路径中的任意一部分都不会记录日志
+        Ignore some request , do not make logs
+        If parent is True , current path contain each partially ignore_path are not make logs
         '''
 
         if self.ignore_re_paths:

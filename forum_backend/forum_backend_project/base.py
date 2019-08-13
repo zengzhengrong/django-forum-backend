@@ -25,8 +25,8 @@ if DEBUG:
     # dev
     ALLOWED_HOSTS = ['*']
 else:
-    # production
-    ALLOWED_HOSTS = ['your-hostname']
+    # production 
+    ALLOWED_HOSTS = ['your host name']
 
 SITE_ID = 1
 

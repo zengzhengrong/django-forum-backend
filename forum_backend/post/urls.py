@@ -4,8 +4,8 @@ from post import views
 
 app_name = 'post'
 
-post_list = views.PostViewSets.as_view({'get':'list','post':'create'})
-post_detail = views.PostViewSets.as_view({
+post_list = views.PostViewSet.as_view({'get':'list','post':'create'})
+post_detail = views.PostViewSet.as_view({
 	'get':'retrieve',
 	'put':'update',
 	'patch':'partial_update',
