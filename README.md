@@ -50,7 +50,7 @@ authentication部分，我参考了django-rest-auth的源码，尤其是serializ
 > ### 用户模块
 
 
-#### /user/list/
+#### `/user/list/`
 
 方法：GET  
 可选参数：无  
@@ -58,7 +58,7 @@ authentication部分，我参考了django-rest-auth的源码，尤其是serializ
 描述：查看所有已注册的用户  
 **JWT_required：true**
 
-#### /user/detail/<int:id>
+#### `/user/detail/<int:id>`
 
 方式：GET  
 可选参数：无  
@@ -80,7 +80,7 @@ authentication部分，我参考了django-rest-auth的源码，尤其是serializ
 }
 ```
 
-#### /user/logs/
+#### `/user/logs/`
 
 方式：GET  
 可选参数：
@@ -92,7 +92,7 @@ page_size # 指定一页显示多少个(max=200)
 描述：查看用户日志  
 **JWT_required：true** 
 
-#### /user/logs/<user-id>
+#### `/user/logs/<user-id>`
 
 方式：GET  
 可选参数：
@@ -109,7 +109,7 @@ page_size # 指定一页显示多少个(max=200)
 > ### 认证模块
 
 
-#### /user/login/
+#### `/user/login/`
 
 方式：POST  
 可选参数：无  
@@ -125,14 +125,14 @@ page_size # 指定一页显示多少个(max=200)
 # note ：username 和 email 只要填一个
 ```
 
-#### /user/logout/
+#### `/user/logout/`
 
 方式：POST  
 可选参数：无  
 权限:所有人   
 描述：用户登出
 
-#### /user/register/
+#### `/user/register/`
 
 方式：POST  
 可选参数：无  
@@ -148,7 +148,7 @@ page_size # 指定一页显示多少个(max=200)
 }
 ```
 
-#### /user/register/active-confirm/
+#### `/user/register/active-confirm/`
 
 方式：POST  
 可选参数：无  
@@ -161,7 +161,7 @@ page_size # 指定一页显示多少个(max=200)
 }
 ```
 
-#### /user/password-reset/
+#### `/user/password-reset/`
 
 方式：POST  
 可选参数：无  
@@ -174,7 +174,7 @@ page_size # 指定一页显示多少个(max=200)
 }
 ```
 
-#### /user/password-reset/confirm/
+#### `/user/password-reset/confirm/`
 
 方式：POST  
 可选参数：无  
@@ -190,7 +190,7 @@ page_size # 指定一页显示多少个(max=200)
 }
 ```
 
-#### /user/password-change/
+#### `/user/password-change/`
 
 方式：POST  
 可选参数：无  
@@ -210,7 +210,7 @@ page_size # 指定一页显示多少个(max=200)
 > ### 分类模块
 
 
-#### /category/list/
+#### `/category/list/`
 
 方式：GET  
 可选参数：无  
@@ -230,7 +230,7 @@ page_size # 指定一页显示多少个(max=200)
 }
 ```
 
-#### /category/detail/<int:id>
+#### `/category/detail/<int:id>`
 
 
 方式：GET  
@@ -260,7 +260,7 @@ page_size # 指定一页显示多少个(max=200)
 
 > ### 帖子模块
 
-#### /post/list/
+#### `/post/list/`
 
 方式：GET  
 可选参数：
@@ -289,7 +289,7 @@ ordering = <options:[views,created,higthlighted] # 可以按照某种规则排�
 ```
 
 
-#### /post/detail/<int:id>
+#### `/post/detail/<int:id>`
 
 方式：GET  
 可选参数：无    
@@ -323,7 +323,7 @@ ordering = <options:[views,created,higthlighted] # 可以按照某种规则排�
 > ### 评论模块
 
 
-#### /comment/list/
+#### `/comment/list/`
 
 方式：GET  
 可选参数：
@@ -352,7 +352,7 @@ post_id # 获取指定帖子下的文章
 # Note： 根据content_type和object_id组合来确认评论哪个帖子或者回复哪个评论
 ```
 
-#### /comment/detail/<int:id>
+#### `/comment/detail/<int:id>`
 
 方式：GET  
 可选参数：无  
@@ -384,14 +384,14 @@ post_id # 获取指定帖子下的文章
 
 > ### 通知模块
 
-#### /notification/user/list/
+#### `/notification/user/list/`
 
 方式：GET  
 可选参数：无  
 权限:已登陆的用户    
 描述：只获取自身的通知(已登陆用户)
 
-#### /notification/detail/<int:id>
+#### `/notification/detail/<int:id>`
 
 方式：GET  
 可选参数：无  
