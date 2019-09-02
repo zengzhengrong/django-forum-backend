@@ -279,7 +279,7 @@ ordering = <options:[views,created,higthlighted] # 可以按照某种规则排�
 --- 
 
 方式：POST  
-可选参数：无
+可选参数：无  
 权限:已登陆用户  
 描述：创建一个新帖子  
 格式：
@@ -296,7 +296,7 @@ ordering = <options:[views,created,higthlighted] # 可以按照某种规则排�
 #### /post/detail/<int:id>
 
 方式：GET  
-可选参数：无  
+可选参数：无    
 权限:所有人  
 描述：获取某个帖子详情
 
@@ -304,7 +304,7 @@ ordering = <options:[views,created,higthlighted] # 可以按照某种规则排�
 --- 
 
 方式：PUT 
-可选参数：无  
+可选参数：无    
 权限:admin或者该帖子的author  
 描述：更新帖子
 格式：
@@ -318,7 +318,7 @@ ordering = <options:[views,created,higthlighted] # 可以按照某种规则排�
 ```
 
 方式：DELETE 
-可选参数：无  
+可选参数：无    
 权限:admin或者该帖子的author  
 描述：删除帖子
 
@@ -340,7 +340,7 @@ post_id # 获取指定帖子下的文章
 ---
 
 方式：POST  
-可选参数：无
+可选参数：无  
 权限:已登陆用户  
 描述：发别评论或者回复  
 格式：
@@ -359,14 +359,14 @@ post_id # 获取指定帖子下的文章
 #### /comment/detail/<int:id>
 
 方式：GET  
-可选参数：无
+可选参数：无  
 权限:admin    
 描述：获取某个评论详情
 
 --- 
 
 方式：PUT 
-可选参数：无
+可选参数：无  
 权限:admin  
 描述：修改评论
 格式：
@@ -391,21 +391,21 @@ post_id # 获取指定帖子下的文章
 #### /notification/user/list/
 
 方式：GET  
-可选参数：无
+可选参数：无  
 权限:已登陆的用户    
 描述：只获取自身的通知(已登陆用户)
 
 #### /notification/detail/<int:id>
 
 方式：GET  
-可选参数：无
+可选参数：无  
 权限:已登陆的用户    
 描述：获取某个通知详情
 
 ---
 
 方式：PUT  
-可选参数：无
+可选参数：无  
 权限:已登陆的用户    
 描述：将通知修改为已读，且只能修改为已读
 格式：
@@ -441,5 +441,6 @@ from utils.token_required import token_required,method_decorator
 
 有任何疑问和bug请提交issue或者从下面方式找我  
 qq: 506862754  
-email: bhg889@163.com  
+email: bhg889@163.com 
+ 
 [个人博客](https://zengzhengrong.com)
