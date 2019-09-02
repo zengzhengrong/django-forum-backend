@@ -70,7 +70,7 @@ authentication部分，我参考了django-rest-auth的源码，尤其是serializ
 可选参数：无  
 权限：该User所属用户  
 描述：修改个人信息  
-**JWT_required：true**
+**JWT_required：true**  
 格式：
 ```
 {
