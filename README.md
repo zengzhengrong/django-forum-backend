@@ -56,7 +56,7 @@ authentication部分，我参考了django-rest-auth的源码，尤其是serializ
 可选参数：无  
 权限：admin  
 描述：查看所有已注册的用户  
-==JWT_required：true==
+**JWT_required：true**
 
 #### /user/detail/<int:id>
 
@@ -70,7 +70,7 @@ authentication部分，我参考了django-rest-auth的源码，尤其是serializ
 可选参数：无  
 权限：该User所属用户  
 描述：修改个人信息  
-==JWT_required：true==
+**JWT_required：true**
 格式：
 ```
 {
@@ -90,7 +90,7 @@ page_size # 指定一页显示多少个(max=200)
 ```
 权限:admin  
 描述：查看用户日志  
-==JWT_required：true== 
+**JWT_required：true** 
 
 #### /user/logs/<user-id>
 
@@ -102,7 +102,7 @@ page_size # 指定一页显示多少个(max=200)
 ```
 权限:admin  
 描述：查看用户日志,当user-id为0时代表查询匿名用户日志  
-==JWT_required：true==  
+**JWT_required：true**  
 
 
 
@@ -196,7 +196,7 @@ page_size # 指定一页显示多少个(max=200)
 可选参数：无  
 权限:登陆用户   
 描述：更改密码，需要登录后操作  
-==JWT_required：true==  
+**JWT_required：true**  
 格式：
 ```
 {
