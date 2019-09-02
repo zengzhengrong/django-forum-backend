@@ -1,14 +1,25 @@
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
-from .views import UserList, UserDetail, Login, Logout , Register, PasswordReset , PasswordResetConfirm, PasswordChange,VerifyRegisterEmail , UserLogList
+from .views import (Login, Logout , Register, PasswordReset , PasswordResetConfirm, 
+                    PasswordChange,VerifyRegisterEmail)
+from . import viewset
 
 app_name = 'user'
 
+user_list = viewset.UserModelViewSet.as_view({'get':'list'})
+user_detail = viewset.UserModelViewSet.as_view({
+    'get':'retrieve',
+    'put':'update',
+    'patch':'partial_update'
+})
+
+user_logs = viewset.UserLogModelViewSet.as_view({'get':'list'})
+
 urlpatterns = format_suffix_patterns([
-    path('list/', UserList.as_view(), name='user-list'),
-    path('logs/', UserLogList.as_view(), name='user-logs'),
-    path('logs/<int:pk>', UserLogList.as_view(), name='user-specify-logs'),
-    path('detail/<int:pk>', UserDetail.as_view(), name='user-detail'),
+    path('list/', user_list, name='user-list'),
+    path('detail/<int:pk>', user_detail, name='user-detail'),
+    path('logs/', user_logs, name='user-logs'),
+    path('logs/<int:pk>', user_logs, name='user-specify-logs'),
     path('login/',Login.as_view(),name='user-login'),
     path('logout/',Logout.as_view(),name='user-logout'),
     path('register/',Register.as_view(),name='user-register'),

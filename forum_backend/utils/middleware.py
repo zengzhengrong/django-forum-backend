@@ -6,33 +6,6 @@ from utils.ip import get_ip_address_from_request
 from datetime import timedelta
 from django.urls import reverse,resolve
 
-class TokenCookieRenewalMiddleware:
-    '''
-    需要身份验证的请求通过后会自动更新（续签）token
-    '''
-    def __init__(self, get_response):
-        self.get_response = get_response
-        # One-time configuration and initialization.
-
-    def __call__(self, request):
-        # Code to be executed for each request before
-        # the view (and later middleware) are called.
-        # token = request.COOKIES.get('token',None)
-        # if not token:
-        #     logout(request)
-        print(request.method)
-        print(request.scheme)
-        # print(reverse('user:user-detail')==request.path_info)
-        print(dir (resolve(request.path_info).func))
-        # print(resolve(request.path_info).func.actions)
-        print(dir(request))
-        response = self.get_response(request)
-        # print(response.content)
-        # print(dir(response))
-        # Code to be executed for each request/response after
-        # the view is called.
-
-        return response
 
 class TokenCookieExpireMiddleware:
     '''
@@ -120,13 +93,13 @@ class UserLogMiddleware:
         return request_data
 
     def log_request(self,request):
-        # print(request.headers)  new in django2.2
         log = UserLog()
         ip = get_ip_address_from_request(request)
         log.username = request.user
         log.request_ip = ip
         log.request_path = request.path
         log.request_type = request.method
+        log.request_headers = dict(request.headers) # new in django2.2
         log.request_data = self.get_request_data(request)
         log.request_meta = self.serializer_request_meta(request.META)
         return log

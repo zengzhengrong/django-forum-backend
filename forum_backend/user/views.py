@@ -2,16 +2,11 @@ from django.contrib.auth import (
     login as django_login,
     logout as django_logout
 )
-from django.shortcuts import render
 from rest_framework import generics,permissions,views,status
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from .serializers import (UserSerializer,UserProfileSerializer,LoginSerializer,JWTSerializer,
-						RegisterSerializer,PasswordResetSerializer,PasswordResetConfirmSerializer,
-						PasswordChangeSerializer,VerifyRegisterEmailSerializer,ActiveConfirmSerilizer,
-						UserLogSerializer)
-from user.permissions import IsUserOwnerOrReadOnly ,IsAdmin
-from user.models import UserProfile,UserLog
+from .serializers import (LoginSerializer,JWTSerializer,RegisterSerializer,PasswordResetSerializer,
+						PasswordResetConfirmSerializer,PasswordChangeSerializer,VerifyRegisterEmailSerializer,
+						ActiveConfirmSerilizer)
 from rest_framework_jwt.settings import api_settings
 from utils.jwt import jwt_encode
 from user.tasks import preform_send_active_email
@@ -20,67 +15,11 @@ from rest_framework_jwt.settings import api_settings as jwt_settings
 from datetime import datetime, timedelta
 from utils.signer import signer
 from threading import Thread
-from user.pagination import UserLogPagination
+from utils.token_required import token_required,method_decorator
 
-User = get_user_model()
-
-
-jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
-
-
-
-
-class UserList(generics.ListAPIView):
-	"""
-	获取用户列表
-	"""
-	queryset = User.objects.all()
-	serializer_class = UserSerializer
-	permission_classes = (IsAdmin,)
-	
-class UserLogList(generics.ListAPIView):
-	"""
-	获取用户日志列表
-	"""
-	queryset = UserLog.objects.all()
-	serializer_class = UserLogSerializer
-	permission_classes = (IsAdmin,)
-	pagination_class = UserLogPagination
-
-	def get(self, request, *args, **kwargs):
-		user_id = kwargs.get('pk')
-
-		if user_id == 0:
-			# 0 表示查询匿名用户
-			self.queryset = UserLog.objects.filter(username='AnonymousUser').all()
-			
-		if user_id and user_id != 0:
-			user = User.objects.get(id=user_id)
-			self.queryset = UserLog.objects.filter(username=user.username).all()
-
-
-		return self.list(request, *args, **kwargs)
-
-
-class UserDetail(generics.RetrieveUpdateAPIView):
-	"""
-	获取用户详情或者更新用户信息
-	"""
-	queryset = User.objects.all()
-	serializer_class = UserSerializer
-	permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsUserOwnerOrReadOnly)
-
-	def put(self, request, *args, **kwargs):
-		self.serializer_class = UserProfileSerializer
-		return self.update(request, *args, **kwargs)
-
-	def get_object(self):
-		instance = super().get_object()
-		if self.request.method == 'PUT':
-			return instance.profile
-		return instance
+# jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+# jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+# jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 class Login(generics.GenericAPIView):
 	'''
@@ -257,6 +196,7 @@ class PasswordChange(generics.GenericAPIView):
 	serializer_class = PasswordChangeSerializer
 	permission_classes = (permissions.IsAuthenticated,)
 
+	@method_decorator(token_required)
 	def post(self, request, *args, **kwargs):
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)

@@ -17,7 +17,6 @@ INSTALLED_APPS = INIT_APPS + [
 ]
 
 MIDDLEWARE = INIT_MIDDLEWARE + [
-    'utils.middleware.TokenCookieRenewalMiddleware',
     'utils.middleware.TokenCookieExpireMiddleware',
     'utils.middleware.UserLogMiddleware',
 ]
@@ -33,7 +32,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication', 替换掉，取消csrf认证
+        'utils.authentication.CsrfExemptSessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
 }

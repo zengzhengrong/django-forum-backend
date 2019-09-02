@@ -217,6 +217,7 @@ class VerifyRegisterEmailSerializer(serializers.Serializer):
             user.is_active = True
             user.save()
         return user
+        
 class ActiveConfirmSerilizer(serializers.Serializer):
     message = serializers.CharField()
     # url = serializers.HyperlinkedIdentityField(view_name='')
