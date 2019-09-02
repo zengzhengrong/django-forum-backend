@@ -433,6 +433,45 @@ from utils.token_required import token_required,method_decorator
 在一些情况中，实现jwt则需要子类复写并调用超类方法
 
 
+> ### 运行
+
+```
+python manage.py runserver
+```
+
+启动celery
+```
+celery -A forum_backend_project worker -l info
+```
+
+默认db带了一些测试数据，下面是账号密码
+
+```
+username:admin
+password:zzradmin
+```
+
+设定环境变量
+在forum_backend_project目录下添加一个```forum.env```文件
+内容如下
+
+```
+
+DEBUG=on
+
+SECRET_KEY='z+t#k)!z6bi7nk&lv#-ppbf69y@u=wa5l+cx@de4=o!8$*&4!p'
+
+DATABASE_URL='sqlite:///db.sqlite3' # 可以修改数据库，记得migrate
+
+EMAIL_HOST='******' # 更换你要使用的邮件服务商
+EMAIL_PORT=25
+EMAIL_HOST_USER='******' # 更换你的邮箱
+EMAIL_HOST_PASSWORD='****' # 更换你的密码
+EMAIL_SUBJECT_PREFIX='django-forum-email'
+
+```
+
+
 > ### 建议反馈
 
 有任何疑问和bug请提交issue或者从下面方式找我  
