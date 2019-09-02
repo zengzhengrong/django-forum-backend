@@ -1,7 +1,3 @@
-> ### 项目地址
-
-[github](https://github.com/zengzhengrong/django-forum-backend)
-
 > ### 前言
 
 之前工作写的，后面用不到了~不过用Django写这玩意真是快，用了3天左右的时间就能把一些主要业务逻辑完成
@@ -442,5 +438,5 @@ from utils.token_required import token_required,method_decorator
 有任何疑问和bug请提交issue或者从下面方式找我  
 qq: 506862754  
 email: bhg889@163.com 
- 
+
 [个人博客](https://zengzhengrong.com)
