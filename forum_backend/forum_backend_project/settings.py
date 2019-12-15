@@ -38,6 +38,14 @@ REST_FRAMEWORK = {
     ),
 }
 
+# DATABASES Settings
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
 # 配置AUTH
 AUTH_USER_MODEL = 'auth.user'
 AUTH_USER_ADMINS = ['zzr']
@@ -69,13 +77,13 @@ JWT_AUTH = {
 SESSION_COOKIE_AGE = 60 * 10
 
 # 配置Celery
-CELERY_BROKER_URL = 'redis://'
+CELERY_BROKER_URL = env('CELERY_REDIS_URL')
 #: Only add pickle to this list if your broker is secured
 #: from unwanted access (see userguide/security.html)
 CELERY_TASK_ROUTES = {
     'user.tasks.add': {'queue': 'math'}
     }
-CELERY_RESULT_BACKEND = 'redis://'
+CELERY_RESULT_BACKEND = env('CELERY_REDIS_URL')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Shanghai'

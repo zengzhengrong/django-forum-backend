@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import environ
-
+import os
 
 BASE_DIR = environ.Path(__file__) - 2 # to root path ./forum_backe/setting.py = .
 env = environ.Env(DEBUG=(bool,False))
@@ -71,10 +71,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'forum_backend_project.wsgi.application'
 
-
-DATABASES = {
-    'default':env.db()
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
