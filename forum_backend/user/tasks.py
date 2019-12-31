@@ -45,4 +45,6 @@ def send_active_email(user,signature):
     subject = '来自django-forum的注册激活通知'
     from_email = getattr(settings,'DEFAULT_FROM_EMAIL','example@example.com')
     target_email = [user.get('email')]
+    # print(from_email)
+    # print(target_email)
     send_mail(subject,msg,from_email,target_email)

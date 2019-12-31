@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from datetime import datetime,timedelta
 from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework import permissions
@@ -6,7 +7,8 @@ from rest_framework.response import Response
 from post.serializers import PostSerializer
 from post.permissions import IsPostAuthorOrReadOnly
 from post.models import Post,Category
-
+from post.pagination import PostPagination
+from django.utils import timezone
 # Create your views here.
 
 # class PostFilter(filters.FilterSet):
@@ -25,6 +27,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsPostAuthorOrReadOnly)
     filter_backends = (filters.SearchFilter,filters.OrderingFilter)
+    pagination_class = PostPagination
     search_fields = ('title',) # 可以根据前缀符号来限制搜索，如'^title' 匹配开头，默认是模糊搜索
     ordering_fields = ('views', 'created', 'highlighted')
 
@@ -50,9 +53,20 @@ class PostViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         # print (params) # 这里有个小问题，在发出请求后这个函数会执行两遍
         category_id = params.get('category_id')
+        lt_datetime = params.get('lt_datetime')
         if category_id:
             queryset = queryset.filter(category__id=category_id)
-        return queryset
+        if lt_datetime:
+            print(lt_datetime)
+            parse_strtime = datetime.strptime(lt_datetime,'%Y-%m-%d-%H-%M-%S')
+            print(parse_strtime.time())
+            print(timezone.localtime().time())
+            timezone.make_aware()
+            datetime.combine()
+            print(timezone.localtime().time() - parse_strtime.time())
+            # print(timezone.localtime() - parse_strtime)
+            queryset = queryset.filter(created__lte=parse_strtime)
+        return queryset.all()
 
     # def get_permissions(self):
     #     if self.action in ('create',):

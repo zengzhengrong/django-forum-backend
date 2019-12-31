@@ -8,6 +8,7 @@ services:
     # On Linux, you may need to update the USER_UID and USER_GID in .devcontainer/Dockerfile 
     # to match your user if not 1000. See https://aka.ms/vscode-remote/containers/non-root for details.
     # user: vscode
+    container_name: django-forum-container
     build: 
       context: ..
       dockerfile: .devcontainer/Dockerfile
@@ -20,16 +21,16 @@ services:
     command: sleep infinity
     
     links: 
-      - db
       - django-forum-redis
-  db:
-    container_name: django-postgres-container
-    image: postgres
-    restart: unless-stopped
-    ports: 
-      - 5432:5432
-    environment:
-      POSTGRES_PASSWORD: 5432
+  #     - django-forum-redis
+  # db:
+  #   container_name: django-postgres-container
+  #   image: postgres
+  #   restart: unless-stopped
+  #   ports: 
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_PASSWORD: 5432
 
   django-forum-redis:
     container_name: django-forum-redis-container

@@ -8,13 +8,13 @@
 	// Uncomment the next line if you want to publish any ports.
 	// "appPort": "8000:8000",
 	// Uncomment the next line to run commands after the container is created.
-	"postCreateCommand": "cd forum_backend && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt",
+	// "postCreateCommand": "cd forum_backend && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt",
 	"extensions": [
 		"ms-python.python",
 		"mikestead.dotenv"
 	],
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
-	"runServices": ["web","db","django-forum-redis"],
+	// "runServices": ["web","db","django-forum-redis"],
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
 	// "shutdownAction": "none",
 	"shutdownAction": "stopCompose",

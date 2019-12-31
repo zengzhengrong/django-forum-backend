@@ -456,17 +456,23 @@ password:zzradmin
 内容如下
 
 ```
-
 DEBUG=on
 
 SECRET_KEY='z+t#k)!z6bi7nk&lv#-ppbf69y@u=wa5l+cx@de4=o!8$*&4!p'
+# 可以修改数据库，记得migrate
+DATABASE_URL='sqlite:///./db.sqlite3'
 
-DATABASE_URL='sqlite:///db.sqlite3' # 可以修改数据库，记得migrate
+# Celery settings
+CELERY_REDIS_URL='redis://django-forum-redis:6379/0'
 
-EMAIL_HOST='******' # 更换你要使用的邮件服务商
-EMAIL_PORT=25
-EMAIL_HOST_USER='******' # 更换你的邮箱
-EMAIL_HOST_PASSWORD='****' # 更换你的密码
+# Eamil Settings
+# 更换你要使用的邮件服务商
+EMAIL_HOST='**'
+EMAIL_PORT=**
+# 更换你的邮箱
+EMAIL_HOST_USER='****' 
+# 更换你的密码
+EMAIL_HOST_PASSWORD='****'
 EMAIL_SUBJECT_PREFIX='django-forum-email'
 
 ```
