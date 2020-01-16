@@ -30,7 +30,8 @@ class PostViewSet(viewsets.ModelViewSet):
     pagination_class = PostPagination
     search_fields = ('title',) # 可以根据前缀符号来限制搜索，如'^title' 匹配开头，默认是模糊搜索
     ordering_fields = ('views', 'created', 'highlighted')
-
+    parse_strtime_formaterror = None
+    
     def perform_create(self, serializer):        
         serializer.save(author=self.request.user)
 
@@ -57,16 +58,32 @@ class PostViewSet(viewsets.ModelViewSet):
         if category_id:
             queryset = queryset.filter(category__id=category_id)
         if lt_datetime:
-            print(lt_datetime)
-            parse_strtime = datetime.strptime(lt_datetime,'%Y-%m-%d-%H-%M-%S')
-            print(parse_strtime.time())
-            print(timezone.localtime().time())
-            timezone.make_aware()
-            datetime.combine()
-            print(timezone.localtime().time() - parse_strtime.time())
-            # print(timezone.localtime() - parse_strtime)
-            queryset = queryset.filter(created__lte=parse_strtime)
+            try:
+                parse_strtime = datetime.strptime(lt_datetime,'%Y-%m-%dT%H:%M:%S')
+            except ValueError:
+                self.parse_strtime_formaterror = True
+                return queryset.all()
+            parse_strtime_time = parse_strtime.time()
+            parse_strtime_date = parse_strtime.date()
+            datetime_combine = datetime.combine(parse_strtime_date,parse_strtime_time)
+            format_to_timezone = timezone.make_aware(datetime_combine,)
+            queryset = queryset.filter(created__lte=format_to_timezone)
         return queryset.all()
+
+    def list(self, request, *args, **kwargs):
+
+        queryset = self.filter_queryset(self.get_queryset())
+        # parse_strtime_formaterror response , must be behind self.get_queryset() method
+        if self.parse_strtime_formaterror:
+            return Response({'message':'The lt_datetime of params format error , Please check out your request'},status=403)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     # def get_permissions(self):
     #     if self.action in ('create',):
