@@ -23,8 +23,9 @@ docker-compose up
 ```
 浏览器打开
 localhost:8001  
-localhost:8002
-部分截图
+localhost:8002  
+
+部分截图：
 ![compose](images/compose.png)
 ![register](images/register.png)
 ![flower](images/flower2.png)
@@ -527,4 +528,3 @@ from utils.token_required import token_required,method_decorator
 qq: 506862754  
 email: bhg889@163.com 
 
-[个人博客](https://zengzhengrong.com)
