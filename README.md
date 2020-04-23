@@ -21,7 +21,7 @@ Clone repo 并运行
 ```
 docker-compose up
 ```
-浏览器打开
+浏览器打开  
 localhost:8001  
 localhost:8002  
 
