@@ -20,10 +20,26 @@ from rest_framework_jwt import views as jwt_views
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from django.conf.urls.static import static # dev config
+from django.conf import settings
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+
+swagger_info = openapi.Info(
+      title="Django Forum API",
+      default_version='v1',
+      description="Dev description",
+      terms_of_service="https://www.google.com/policies/terms/",
+      contact=openapi.Contact(email="bhg889@163.com"),
+      license=openapi.License(name="BSD License"),
+      )
 
 @api_view(['GET'])
 def ApiRoot(request,format=None):
 	return Response({
+        'swagger':reverse('schema-swagger-ui',request=request,format=format),
 		'users':reverse('user:user-list',request=request,format=format),
         'userlogs':reverse('user:user-logs',request=request,format=format),
         'categorys':reverse('category:category-list',request=request,format=format),
@@ -41,6 +57,18 @@ def ApiRoot(request,format=None):
             }
 		})
 
+# Swagger UI / Open API
+schema_view = get_schema_view(
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
+
+swagger_urlpatterns = [
+    path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc')
+]
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
@@ -54,4 +82,4 @@ urlpatterns = [
     path('user/password-reset/confirm/<uidb64>/<token>/',TemplateView.as_view(template_name="password_reset_confirm.html"),name='password_reset_confirm'),
     # this url is used to generate email content key for register_confirm
     path('user/register-confirm-email/<signature>/', TemplateView.as_view(),name='register_confirm')
-]
+] + swagger_urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -21,16 +21,26 @@ def token_required(f):
     '''
     需要身份验证的请求
     用于生成类方法装饰器
-    postman 中选择在请求头添加Authorization，值为token
+    postman 中选择在请求头添加Authorization，值为Bearer token
     '''
     @wraps(f)
     def decorated(request,*args,**kwargs):
-        auth_token = request.headers.get('Authorization')
+        auth_token :str = request.headers.get('Authorization')
 
         if not auth_token: # 无token
             return Response({'message':'Provide token'},403)
-        
-        username,status_code = jwt_decode(auth_token)
+        try:
+            # token 类型不正确
+            if len(auth_token.split(' ')) == 1:
+                return Response({'message':'Invalid token Type'},403)
+            token_type , token =  auth_token.split(' ')
+            if token_type != 'Bearer':
+                return Response({'message':'Invalid token Type'},403)
+            username,status_code = jwt_decode(token)
+
+        except Exception as identifier:
+            return Response({'message':'Invalid token Type'},403)
+
 
         if status_code == 200: # token 验证通过，匹配后端session的user数据
             if request.user.username == username:
@@ -38,7 +48,7 @@ def token_required(f):
             return Response({'message':'Session Invalid'},403) # session 验证错误
 
         if status_code == 403: # token 验证不通过
-            return Response({'message':'Invalid token'},403)
+            return Response({'message':'Invalid or expired token'},403)
 
         return f(request,*args,**kwargs)
     return decorated

@@ -4,11 +4,12 @@ from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
-from post.serializers import PostSerializer
+from post.serializers import PostSerializer,ListPostSerializer
 from post.permissions import IsPostAuthorOrReadOnly
 from post.models import Post,Category
 from post.pagination import PostPagination
 from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
 # Create your views here.
 
 # class PostFilter(filters.FilterSet):
@@ -32,7 +33,7 @@ class PostViewSet(viewsets.ModelViewSet):
     ordering_fields = ('views', 'created', 'highlighted')
     parse_strtime_formaterror = None
     
-    def perform_create(self, serializer):        
+    def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
@@ -45,34 +46,46 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
-    def get_queryset(self):
+    # def get_queryset(self):
+    #     '''
+    #     根据url参数来确定返回的查询集
+    #     如筛选某分类下的帖子
+    #     '''
+
+    #     return 
+
+    @swagger_auto_schema(query_serializer=ListPostSerializer,operation_id=1)
+    def list(self, request, *args, **kwargs):
         '''
-        根据url参数来确定返回的查询集
-        如筛选某分类下的帖子
+        获取帖子列表
+        可选参数
+            search:搜索词,可以根据前缀符号来限制搜索，如'^title' 匹配开头，默认是模糊搜索
+            ordering:排序 ，支持的栏位(views, created, highlighted) or (-views, -created, -highlighted) -符表示倒序
+            page:页数
+            page_size:一页的个数
+            category_id:分类的id，只获取该分类下的帖子
+            lt_datetime:只获取小于该时间的帖子，格式：%Y-%m-%dT%H:%M:%S
         '''
         params = self.request.query_params
-        queryset = self.queryset
-        # print (params) # 这里有个小问题，在发出请求后这个函数会执行两遍
+
         category_id = params.get('category_id')
         lt_datetime = params.get('lt_datetime')
         if category_id:
-            queryset = queryset.filter(category__id=category_id)
+            self.queryset = self.queryset.filter(category__id=category_id)
         if lt_datetime:
             try:
                 parse_strtime = datetime.strptime(lt_datetime,'%Y-%m-%dT%H:%M:%S')
+                parse_strtime_time = parse_strtime.time()
+                parse_strtime_date = parse_strtime.date()
+                datetime_combine = datetime.combine(parse_strtime_date,parse_strtime_time)
+                format_to_timezone = timezone.make_aware(datetime_combine,)
+                self.queryset = self.queryset.filter(created__lte=format_to_timezone)
             except ValueError:
                 self.parse_strtime_formaterror = True
-                return queryset.all()
-            parse_strtime_time = parse_strtime.time()
-            parse_strtime_date = parse_strtime.date()
-            datetime_combine = datetime.combine(parse_strtime_date,parse_strtime_time)
-            format_to_timezone = timezone.make_aware(datetime_combine,)
-            queryset = queryset.filter(created__lte=format_to_timezone)
-        return queryset.all()
 
-    def list(self, request, *args, **kwargs):
+        self.queryset = self.queryset.all()
 
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.queryset)
         # parse_strtime_formaterror response , must be behind self.get_queryset() method
         if self.parse_strtime_formaterror:
             return Response({'message':'The lt_datetime of params format error , Please check out your request'},status=403)

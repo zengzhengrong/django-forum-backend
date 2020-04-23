@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  django-forum-backend:
+    container_name: django-forum-backend-container
+    build: ./forum_backend
+    restart: always
+    ports:
+     - "8001:8000"
+    depends_on:
+      - django-forum-redis
+    command: python manage.py runserver 0.0.0.0:8000
+  django-forum-redis:
+    container_name: django-forum-redis-container2
+    image: redis:alpine
+    restart: always
+
+  # db:
+  #   container_name: django-postgres-container
+  #   image: postgres
+  #   restart: unless-stopped
+  #   ports: 
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_PASSWORD: 5432

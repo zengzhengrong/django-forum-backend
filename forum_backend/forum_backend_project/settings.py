@@ -1,13 +1,13 @@
 
 from .base import *
 import datetime
-
-
+from django.urls import reverse_lazy
 # Application definition
 
 INSTALLED_APPS = INIT_APPS + [
     'rest_framework',
     'corsheaders',
+    'drf_yasg',
     'user',
     'category',
     'comment',
@@ -27,6 +27,8 @@ MIDDLEWARE.insert(2,'corsheaders.middleware.CorsMiddleware')
 REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     # 'PAGE_SIZE': 2,
+    'URL_FORMAT_OVERRIDE':'format',
+    'FORMAT_SUFFIX_KWARG':'format', # https://www.django-rest-framework.org/api-guide/settings/#format_suffix_kwarg
     'DEFAULT_PERMISSION_CLASSES': (
         # 'rest_framework.permissions.IsAuthenticated',
     ),
@@ -43,6 +45,35 @@ DATABASES = {
     'default':env.db()
 }
 
+# 配置Swagger UI / Open API
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': reverse_lazy('user:user-login'),
+    'LOGOUT_URL': reverse_lazy('user:user-logout'),
+    'DEFAULT_INFO': 'forum_backend_project.urls.swagger_info',
+    'USE_SESSION_AUTH': False,
+    'PERSIST_AUTH': False,
+    'REFETCH_SCHEMA_WITH_AUTH': False,
+    'REFETCH_SCHEMA_ON_LOGOUT': False,
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic'
+        },
+        'Bearer': {
+            'in': 'header',
+            'name': 'Authorization',
+            'type': 'apiKey',
+        },
+        'Query': {
+            'in': 'query',
+            'name': 'auth',
+            'type': 'apiKey',
+        },
+    },
+}
+
+REDOC_SETTINGS = {
+   'LAZY_RENDERING': False,
+}
 
 # 配置AUTH
 AUTH_USER_MODEL = 'auth.user'
@@ -70,10 +101,10 @@ CORS_ORIGIN_ALLOW_ALL = True # dev
 # 配置jwt认证
 JWT_AUTH = {
     'JWT_AUTH_COOKIE': 'token',
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=600)
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=6000)
 }
 # 配置Session 过期时间 和 JWT过期时间一样
-SESSION_COOKIE_AGE = 60 * 10
+SESSION_COOKIE_AGE = 600 * 10
 
 # 配置Celery
 CELERY_BROKER_URL = env('CELERY_REDIS_URL')

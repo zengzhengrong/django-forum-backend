@@ -1,6 +1,6 @@
 from django.urls import path
-from rest_framework.urlpatterns import format_suffix_patterns
 from comment import views
+# from rest_framework.urlpatterns import format_suffix_patterns
 
 app_name = 'comment'
 
@@ -12,8 +12,8 @@ comment_detail = views.CommentViewSet.as_view({
 	'delete':'destroy'
 	})
 
-urlpatterns = format_suffix_patterns([
+urlpatterns = [
     path('list/', comment_list, name='comment-list'),
     path('detail/<int:pk>', comment_detail, name='comment-detail')
 
-])
+]

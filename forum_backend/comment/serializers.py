@@ -1,11 +1,13 @@
 from rest_framework import serializers
 from post.models import Post
+from post.serializers import PostSerializer
 from category.models import Category
 from comment.models import Comment
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.reverse import reverse
 from utils.serializer_tools import CommentTargetSerializer
 from notification.serializers import find_post
+from drf_yasg.utils import swagger_serializer_method
 
 class CommentSerializer(serializers.ModelSerializer):
     # commmet_user_url = serializers.HyperlinkedIdentityField(view_name='user:user-detail',
@@ -33,12 +35,19 @@ class CommentSerializer(serializers.ModelSerializer):
         model_class = content_type.model_class()
         return model_class
 
+    # @swagger_serializer_method(serializer_or_field=serializers.DictField(child=PostSerializer,read_only=True))
     def get_target(self,obj):
         model_class = self.target_model_class(obj)
-        target_obj = model_class.objects.get(id=obj.object_id)
+
+        target_obj = model_class.objects.get(id=obj.object_id) \
+            if model_class.objects.filter(id=obj.object_id).exists() \
+            else None
+        if not target_obj :
+            return {'message':'评论对象目标不存在','status_code':404} 
         data = CommentTargetSerializer.payload(target_obj,obj.content_type.id)
         return data
 
+    @swagger_serializer_method(serializer_or_field=serializers.CharField)
     def get_description(self,obj):
         model_class = self.target_model_class(obj)
         if model_class.__name__ == 'Comment':
@@ -114,4 +123,16 @@ class RelayCommentSerializer(serializers.ModelSerializer):
 
 
 
+class ListCommentQuerySerializer(serializers.Serializer):
+    '''
+    List查询参数序列化类
+    '''
+    post_id = serializers.IntegerField(help_text='帖子的id',required=False)
 
+
+class PostCommentQuerySerializer(serializers.Serializer):
+    '''
+    Post查询参数序列化类
+    '''
+    from_type = serializers.ChoiceField(('post','comment'),help_text='选择来源类型',required=False)
+    from_id = serializers.IntegerField(help_text='选择来源类型ID',required=False)

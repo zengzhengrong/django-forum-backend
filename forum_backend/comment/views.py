@@ -1,18 +1,19 @@
 from rest_framework import generics,permissions
 from comment.models import Comment
-from comment.serializers import CommentSerializer
+from comment.serializers import CommentSerializer,ListCommentQuerySerializer,PostCommentQuerySerializer
 from django.contrib.contenttypes.models import ContentType
 from post.models import Post
 from rest_framework.response import Response
 from rest_framework import status,viewsets,permissions
-from .permissions import IsAdmin
+from drf_yasg.utils import swagger_auto_schema
+from .permissions import IsAdminDelete
 from . import handlers
 
 class CommentViewSet(viewsets.ModelViewSet):
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAdminDelete,)
 
     def get_total(self,comments):
 
@@ -62,7 +63,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         q = Comment.objects.filter(id=0).all() # 初始化构建一个空查询集
         return self.get_subcomments(sub_comments,total=total,q=q)    
 
+    @swagger_auto_schema(query_serializer=ListCommentQuerySerializer)
     def list(self, request, *args, **kwargs):
+        '''
+        查询评论  
+        可选参数：post_id ,只返回该id的评论
+        '''
         params = self.request.query_params
         # print(params)
         ct_id = params.get('post_id')
@@ -97,7 +103,20 @@ class CommentViewSet(viewsets.ModelViewSet):
 
             kwargs.update({'from_object':from_object})
 
+    @swagger_auto_schema(query_serializer=PostCommentQuerySerializer)
     def create(self, request, *args, **kwargs):
+        '''
+        创建一个评论  
+        query params：
+            from_type：引用源 在(post,comment)两者中选一个
+            from_id：引用源id
+        request body：
+            content:正文内容
+            nested:内联评论
+            voted:投票评论
+            content_type:通用类型,用于指定该模型关联何种模型（9->Comment Model，10-> Post Model分别意思是回复评论和回复帖子）
+            object_id:通用类型ID
+        '''
         self.pre_create(request, *args, **kwargs)
         from_object = kwargs.get('from_object')
         request.from_object = from_object # 将转发源的模型更新进request，用于post请求
@@ -119,6 +138,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
+        '''
+        删除评论
+        需要管理员权限
+        '''
         instance = self.get_object()
         self.perform_destroy(instance)
         data = {

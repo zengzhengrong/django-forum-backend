@@ -10,6 +10,4 @@ Pipfile
 Pipfile.lock
 media/
 django_blog.code-workspace
-forum_backend/db.sqlite3
 forum_backend/forum_backend_project/forum.env
-

@@ -8,11 +8,90 @@
 2.基本的用户业务逻辑  
 3.基本的鉴权  
 4.采用Celery做分布式任务
+5.Swagger UI (Open API)
 
 > ### 作为参考（学习）
 
 使用了DRF作为前后端分离框架，而且使用jwt+session来做身份验证，需要对这部分有一定基础，建议萌新去刷一遍DRF的官方指导教程，视图主要采用ViewSet方式来实现，路由没有用DRF官方给的Router来构建路由（后续可能会改用）。在
 authentication部分，我参考了django-rest-auth的源码，尤其是serializer和view部分，并额外加入了部分判断逻辑
+
+
+> ### docker-compose 运行
+Clone repo 并运行
+```
+docker-compose up
+```
+浏览器打开
+localhost:8001  
+localhost:8002
+部分截图
+![compose](images/compose.png)
+![register](images/register.png)
+![flower](images/flower2.png)
+
+> ### Vscode开发模式
+安装VScode remote-container插件
+
+在.devcontainer目录里 已将一部分环境搭建好  
+
+按F1 选择 Reopen in container，随后vscode进入容器内部
+
+
+> ### 运行
+
+```
+python manage.py runserver
+```
+
+启动celery
+```
+celery -A forum_backend_project worker -l info -c 1
+```
+
+启动flower 监控celery
+```
+celery -A forum_backend_project flower --address=127.0.0.1 --port=5555
+```
+localhost:5555 访问监控界面
+
+默认db带了一些测试数据，下面是账号密码
+
+```
+# admin account
+username:admin
+password:zzradmin
+
+# user account
+username:zeron
+password:zeron123
+```
+
+设定环境变量
+在forum_backend_project目录下添加一个```forum.env```文件
+内容如下
+
+```
+DEBUG=on
+
+SECRET_KEY='z+t#k)!z6bi7nk&lv#-ppbf69y@u=wa5l+cx@de4=o!8$*&4!p'
+# 可以修改数据库，记得migrate
+DATABASE_URL='sqlite:///./db.sqlite3'
+
+# Celery settings
+CELERY_REDIS_URL='redis://django-forum-redis:6379/0'
+
+# Eamil Settings
+# 更换你要使用的邮件服务商
+EMAIL_HOST='**'
+EMAIL_PORT=**
+# 更换你的邮箱
+EMAIL_HOST_USER='****' 
+# 更换你的密码
+EMAIL_HOST_PASSWORD='****'
+EMAIL_SUBJECT_PREFIX='django-forum-email'
+
+```
+
 > ### API Root
 
 ```
@@ -32,13 +111,17 @@ authentication部分，我参考了django-rest-auth的源码，尤其是serializ
         "password-change": "http://127.0.0.1:8000/user/password-change/"
     }
 ```
-
+![APIroot](images/apiroot.png)
+> ### Swagger UI
+http://127.0.0.1:8000/swagger/
+![Swagger](images/swagger.png)
+![Swagger](images/swagger-title.png)
 > ## API文档
 
 如显示```JWT_required：true```的请求需要在请求头部添加如下
 ```
 {
-    "Authorization":"<user-token>"
+    "Authorization":"Bearer <user-token>"
 }
 ```
 
@@ -261,9 +344,12 @@ page_size # 指定一页显示多少个(max=200)
 方式：GET  
 可选参数：
 ```
-category_id # 只看某个分类下的帖子
-search = <string:post-title> # 搜索含有该字符的标题帖子
-ordering = <options:[views,created,higthlighted] # 可以按照某种规则排序，可前面加-号表示倒序
+search:搜索词,可以根据前缀符号来限制搜索，如'^title' 匹配开头，默认是模糊搜索
+ordering:排序 ，支持的栏位(views, created, highlighted) or (-views, -created, -highlighted) -符表示倒序
+page:页数
+page_size:一页的个数
+category_id:分类的id，只获取该分类下的帖子
+lt_datetime:只获取小于该时间的帖子，格式：%Y-%m-%dT%H:%M:%S
 ```
 权限:所有人  
 描述：获取所有帖子
@@ -346,6 +432,9 @@ post_id # 获取指定帖子下的文章
 }
 
 # Note： 根据content_type和object_id组合来确认评论哪个帖子或者回复哪个评论
+在这个repo数据库里
+"content_type": 9代表是评论模型
+"content_type": 10代表是帖子模型
 ```
 
 #### `/comment/detail/<int:id>`
@@ -429,50 +518,8 @@ from utils.token_required import token_required,method_decorator
 在一些情况中，实现jwt则需要子类复写并调用超类方法
 
 
-> ### 运行
-
-```
-python manage.py runserver
-```
-
-启动celery
-```
-celery -A forum_backend_project worker -l info
-```
-
-默认db带了一些测试数据，下面是账号密码
-
-```
-username:admin
-password:zzradmin
-```
-
-设定环境变量
-在forum_backend_project目录下添加一个```forum.env```文件
-内容如下
-
-```
-DEBUG=on
-
-SECRET_KEY='z+t#k)!z6bi7nk&lv#-ppbf69y@u=wa5l+cx@de4=o!8$*&4!p'
-# 可以修改数据库，记得migrate
-DATABASE_URL='sqlite:///./db.sqlite3'
-
-# Celery settings
-CELERY_REDIS_URL='redis://django-forum-redis:6379/0'
-
-# Eamil Settings
-# 更换你要使用的邮件服务商
-EMAIL_HOST='**'
-EMAIL_PORT=**
-# 更换你的邮箱
-EMAIL_HOST_USER='****' 
-# 更换你的密码
-EMAIL_HOST_PASSWORD='****'
-EMAIL_SUBJECT_PREFIX='django-forum-email'
-
-```
-
+> ### Change Log
+[2020-4-23]:新增swagger UI ，修复若干个bugs
 
 > ### 建议反馈
 

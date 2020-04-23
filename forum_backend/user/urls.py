@@ -1,5 +1,4 @@
 from django.urls import path
-from rest_framework.urlpatterns import format_suffix_patterns
 from .views import (Login, Logout , Register, PasswordReset , PasswordResetConfirm, 
                     PasswordChange,VerifyRegisterEmail)
 from . import viewset
@@ -15,7 +14,7 @@ user_detail = viewset.UserModelViewSet.as_view({
 
 user_logs = viewset.UserLogModelViewSet.as_view({'get':'list'})
 
-urlpatterns = format_suffix_patterns([
+urlpatterns = [
     path('list/', user_list, name='user-list'),
     path('detail/<int:pk>', user_detail, name='user-detail'),
     path('logs/', user_logs, name='user-logs'),
@@ -27,4 +26,4 @@ urlpatterns = format_suffix_patterns([
     path('password-reset/confirm/',PasswordResetConfirm.as_view(),name='user-password-confirm'),
     path("password-change/", PasswordChange.as_view(), name="user-password-change"),
     path("register/active-confirm/", VerifyRegisterEmail.as_view(), name="user-register-active-confirm")
-])
+]

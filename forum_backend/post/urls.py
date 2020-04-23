@@ -1,5 +1,4 @@
 from django.urls import path
-from rest_framework.urlpatterns import format_suffix_patterns
 from post import views
 
 app_name = 'post'
@@ -13,8 +12,8 @@ post_detail = views.PostViewSet.as_view({
 	})
 
 
-urlpatterns = format_suffix_patterns([
+urlpatterns = [
     path('list/', post_list, name='post-list'),
     path('detail/<int:pk>', post_detail, name='post-detail'),
-])
+]
 

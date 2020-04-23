@@ -20,9 +20,10 @@ class TokenCookieExpireMiddleware:
         # Code to be executed for each request before
         # the view (and later middleware) are called.
         token = request.COOKIES.get('token',None)
-        response = self.get_response(request)
         if not token:
             logout(request)
+        response = self.get_response(request)
+ 
         # Code to be executed for each request/response after
         # the view is called.
 
@@ -33,7 +34,7 @@ class UserLogMiddleware:
 
     ignore_ip = ['0.0.0.0']
     ignore_paths = ['/admin/jsi18n/','/user/logs/']
-    ignore_re_paths = [r'/user/logs/[0-9]+']
+    ignore_re_paths = [r'/user/logs/[0-9]+',r'/media/avatar/.*',r'/admin/user/userlog/.*']
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -45,12 +46,17 @@ class UserLogMiddleware:
         return self.sandwich_handler(request)
 
     def sandwich_handler(self,request):
-        response = self.ignore_request(request,parent=True)
-        if response:
-            return response
-        response = self.check_current_userlog(request)
-        if response:
-            return response
+        # based on ignore_* args  if matched args  skip request/response log
+        not_log_response = self.ignore_request(request,parent=True)
+        if not_log_response:
+            return not_log_response
+
+        # if existed log in 10s , skip this request/response log
+        repeat_log_response = self.check_current_userlog(request)
+        if repeat_log_response:
+            return repeat_log_response
+
+        # handler request/response log and save in database
         response = self.log_response(request)
 
         return response

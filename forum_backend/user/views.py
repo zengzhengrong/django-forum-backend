@@ -59,7 +59,9 @@ class Login(generics.GenericAPIView):
 			data = {
 					'message':'登陆成功',
 					'user': self.user,
-					'token': self.token
+					'type': 'Bearer',
+					'token': self.token,
+					'token_with_type': f'Bearer {self.token}'
 					}
 			serializer = serializer_class(instance=data,context={'request': self.request})
 			response = Response(serializer.data, status=status.HTTP_200_OK)

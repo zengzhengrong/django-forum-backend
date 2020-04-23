@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  django-forum-backend:
+    container_name: django-forum-backend-container
+    build: ./forum_backend
+    restart: always
+    ports:
+     - "8001:8000"
+     - "8002:5555"
+    depends_on:
+      - django-forum-redis
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        python manage.py runserver 0.0.0.0:8000 &
+        echo "Wait Django up" && sleep 10
+        celery multi start -A forum_backend_project worker -l info -c 1
+        until timeout 10 celery -A forum_backend_project inspect ping; do >&2 echo "Celery workers not available"; done
+        echo 'Starting flower'
+        celery -A forum_backend_project flower --address=0.0.0.0 --port=5555 --loglevel=info --auto_refresh=True
+  django-forum-redis:
+    container_name: django-forum-redis-container2
+    image: redis:alpine
+    restart: always
+
+  # db:
+  #   container_name: django-postgres-container
+  #   image: postgres
+  #   restart: unless-stopped
+  #   ports: 
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_PASSWORD: 5432

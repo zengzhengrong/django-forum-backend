@@ -1,5 +1,4 @@
 from django.urls import path
-from rest_framework.urlpatterns import format_suffix_patterns
 from notification import views
 
 app_name = 'notification'
@@ -13,8 +12,8 @@ notification_detail = views.NotificationViewSet.as_view({
 	})
 
 
-urlpatterns = format_suffix_patterns([
+urlpatterns = [
     path('user/list/', notification_user_list, name='notification-list'),
     path('detail/<int:pk>', notification_detail, name='notification-detail'),
-])
+]
 
