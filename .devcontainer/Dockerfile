@@ -12,6 +12,7 @@ ENV TZ='Asia/Shanghai'
 # copy "noop.txt" so the COPY instruction does not fail if no requirements.txt exists.
 COPY requirements.txt* .devcontainer/noop.txt /tmp/pip-tmp/
 
+COPY sources.list /etc/apt/
 # Configure apt and install packages
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils 2>&1 \

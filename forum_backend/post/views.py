@@ -54,7 +54,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     #     return 
 
-    @swagger_auto_schema(query_serializer=ListPostSerializer,operation_id=1)
+    @swagger_auto_schema(query_serializer=ListPostSerializer)
     def list(self, request, *args, **kwargs):
         '''
         获取帖子列表
