@@ -74,6 +74,52 @@ SWAGGER_SETTINGS = {
 REDOC_SETTINGS = {
    'LAZY_RENDERING': False,
 }
+# 配置Swagger UI / Open API End
+
+
+# 配置Logging settings
+LOGGING_FORMATTERS = {
+    'verbose': {'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'},
+    'simple': {'format': '%(levelname)s %(message)s'}
+    }
+LOGGING_HANDLERS = {
+            'console': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'simple'
+            },
+            'logstash': {
+                'level': 'WARNING',
+                'class': 'logstash.TCPLogstashHandler',
+                'host': env('ELK_LOGSTASH_HOST'),
+                'port': env.int('ELK_LOGSTASH_PORT'),
+                'version': 1,
+                'message_type': 'django_logstash',  # 'type' field in logstash message. Default value: 'logstash'.
+                'fqdn': False,  # Fully qualified domain name. Default value: false.
+                'tags': ['django.request'],
+            },
+        }
+
+LOGGING_LOGGERS = {
+            'django': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+            'django.request': {
+                'handlers': ['logstash'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
+        }
+if env.bool('ELK'):
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': LOGGING_FORMATTERS,
+        'handlers': LOGGING_HANDLERS,
+        'loggers': LOGGING_LOGGERS,
+    }
 
 # 配置AUTH
 AUTH_USER_MODEL = 'auth.user'

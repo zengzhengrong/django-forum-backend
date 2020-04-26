@@ -4,6 +4,7 @@ from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
+from rest_framework.exceptions import server_error
 from post.serializers import PostSerializer,ListPostSerializer
 from post.permissions import IsPostAuthorOrReadOnly
 from post.models import Post,Category

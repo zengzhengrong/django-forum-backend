@@ -20,6 +20,13 @@ services:
         until timeout 10 celery -A forum_backend_project inspect ping; do >&2 echo "Celery workers not available"; done
         echo 'Starting flower'
         celery -A forum_backend_project flower --address=0.0.0.0 --port=5555 --loglevel=info --auto_refresh=True
+    # logging:
+    #   driver: syslog
+    #   options:
+    #     syslog-address: tcp://0.0.0.0:5000
+    #     tag: django-forum-backend-container
+    # ELK logging
+
   django-forum-redis:
     container_name: django-forum-redis-container2
     image: redis:alpine
