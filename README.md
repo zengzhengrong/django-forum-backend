@@ -73,6 +73,10 @@ password:zeron123
 
 ```
 DEBUG=on
+# 开启ELK
+ELK=off
+ELK_LOGSTASH_HOST=x.x.x.x
+ELK_LOGSTASH_PORT=5000
 
 SECRET_KEY='z+t#k)!z6bi7nk&lv#-ppbf69y@u=wa5l+cx@de4=o!8$*&4!p'
 # 可以修改数据库，记得migrate
@@ -93,6 +97,15 @@ EMAIL_SUBJECT_PREFIX='django-forum-email'
 
 ```
 
+> ### 启动ELK
+修改你环境变量 ```ELK=on```  
+cd docker-elk
+
+```
+docker-compose up -d
+```
+具体其他设定请查看[docker-elk](https://github.com/deviantony/docker-elk)
+![kibana](images/kibana.png)
 > ### API Root
 
 ```
@@ -117,6 +130,7 @@ EMAIL_SUBJECT_PREFIX='django-forum-email'
 http://127.0.0.1:8000/swagger/
 ![Swagger](images/swagger.png)
 ![Swagger](images/swagger-title.png)
+
 > ## API文档
 
 如显示```JWT_required：true```的请求需要在请求头部添加如下
