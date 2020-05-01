@@ -25,7 +25,7 @@ from django.conf import settings
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-
+from utils.flower import flower_view
 
 swagger_info = openapi.Info(
       title="Django Forum API",
@@ -39,6 +39,7 @@ swagger_info = openapi.Info(
 @api_view(['GET'])
 def ApiRoot(request,format=None):
 	return Response({
+        'celery-flower':reverse('celery_flower',request=request,format=format),
         'swagger':reverse('schema-swagger-ui',request=request,format=format),
 		'users':reverse('user:user-list',request=request,format=format),
         'userlogs':reverse('user:user-logs',request=request,format=format),
@@ -72,7 +73,7 @@ swagger_urlpatterns = [
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
-    path('',ApiRoot,name='api-index'),
+    path('api-index/',ApiRoot,name='api-index'),
     path('category/', include('category.urls')),
     path('notification/', include('notification.urls')),
     path('post/', include('post.urls')),
@@ -81,5 +82,7 @@ urlpatterns = [
     # this url is used to generate email content uidb64 and token for password_reset_confirm
     path('user/password-reset/confirm/<uidb64>/<token>/',TemplateView.as_view(template_name="password_reset_confirm.html"),name='password_reset_confirm'),
     # this url is used to generate email content key for register_confirm
-    path('user/register-confirm-email/<signature>/', TemplateView.as_view(),name='register_confirm')
+    path('user/register-confirm-email/<signature>/', TemplateView.as_view(),name='register_confirm'),
+    # Redirect to celery flower
+    re_path(r'^flower/',flower_view,name='celery_flower')
 ] + swagger_urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

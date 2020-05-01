@@ -80,7 +80,20 @@ ELK_LOGSTASH_PORT=5000
 
 SECRET_KEY='z+t#k)!z6bi7nk&lv#-ppbf69y@u=wa5l+cx@de4=o!8$*&4!p'
 # 可以修改数据库，记得migrate
+# vscode debug mode
+# DATABASE_URL='sqlite:///./forum_backend/db.sqlite3'
+
+# normal mode
 DATABASE_URL='sqlite:///./db.sqlite3'
+
+# vscode debug mode
+# DATABASE_URL='sqlite:///./forum_backend/db.sqlite3'
+
+# normal mode
+# DATABASE_URL='sqlite:///./db.sqlite3'
+
+# depoly mode (use docker-compose-deploy)
+# DATABASE_URL='mysql://admin:zzradmin@db:3306/forum'
 
 # Celery settings
 CELERY_REDIS_URL='redis://django-forum-redis:6379/0'
@@ -534,7 +547,10 @@ from utils.token_required import token_required,method_decorator
 
 
 > ### Change Log
-[2020-4-23]:新增swagger UI ，修复若干个bugs
+[2020-5-1]:docker-compose 一键部署 nginx + api + redis + celery + mysql + phpmyadmin  
+[2020-4-27]:新增ELK 整合，django日志推送到Elasticsearch ，kibana可视化  
+[2020-4-25]:修复在容器内开发时 vscode sqlite3插件不可用 ，现在已经可以直接右键 ```Open Database```查看sqlite3表（底下的SQLITE EXPLORER）  
+[2020-4-23]:新增swagger UI ，修复若干个bugs  
 
 > ### 建议反馈
 

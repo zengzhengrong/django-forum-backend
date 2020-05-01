@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('name', models.CharField(blank=True, max_length=50, unique=True, verbose_name='名称')),
-                ('history', utils.models_field.DictListField(blank=True, unique=True, verbose_name='历史记录')),
+                ('history', utils.models_field.DictListField(blank=True, unique=False, verbose_name='历史记录')),
             ],
             options={
                 'verbose_name': '分类',

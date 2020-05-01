@@ -1,6 +1,0 @@
-[2020-04-23 15:55:18,333: INFO/MainProcess] Connected to redis://django-forum-redis:6379//
-[2020-04-23 15:55:19,690: INFO/MainProcess] mingle: searching for neighbors
-[2020-04-23 15:55:23,379: INFO/MainProcess] mingle: all alone
-[2020-04-23 15:55:24,195: WARNING/MainProcess] /usr/local/lib/python3.7/site-packages/celery/fixups/django.py:202: UserWarning: Using settings.DEBUG leads to a memory leak, never use this setting in production environments!
-  warnings.warn('Using settings.DEBUG leads to a memory leak, never '
-[2020-04-23 15:55:24,196: INFO/MainProcess] worker@ac94a697ce6e ready.

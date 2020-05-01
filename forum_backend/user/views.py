@@ -1,3 +1,4 @@
+import logging
 from django.contrib.auth import (
     login as django_login,
     logout as django_logout
@@ -20,6 +21,7 @@ from utils.token_required import token_required,method_decorator
 # jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 # jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 # jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+logger = logging.getLogger('send_email')
 
 class Login(generics.GenericAPIView):
 	'''
@@ -49,7 +51,15 @@ class Login(generics.GenericAPIView):
 			serializer = serializer_class(instance=data)
 			signature = Register.generate_signature(self.user.username)
 
-			# celery asyn task
+			# celery asyn task and logging
+			logger.info(
+			'"Resend actived emalil"',
+			extra={
+			'source':'user.views.Register',
+			'username':user.username,
+			'email':user.email,
+			'signature':signature})
+
 			preform_send_active_email(self.user,signature)
 
 			return Response(serializer.data,status=status.HTTP_403_FORBIDDEN)
@@ -128,7 +138,15 @@ class Register(generics.CreateAPIView):
 		user = serializer.save(self.request)
 		signature = self.generate_signature(user.username)
 
-		# celery asyn task
+		# celery asyn task and logging
+		logger.info(
+		'"Send actived emalil"',
+		extra={
+		'source':'user.views.Register',
+		'username':user.username,
+		'email':user.email,
+		'signature':signature})
+
 		preform_send_active_email(user,signature)
 
 		self.token = jwt_encode(user)

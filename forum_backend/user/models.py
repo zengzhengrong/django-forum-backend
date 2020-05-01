@@ -53,11 +53,11 @@ class UserLog(TimeStampedModel):
     request_path = models.CharField(max_length=150,null=True,blank=True,verbose_name='请求路径')
     http_type = Choices('GET','POST','DELETE','PUT','PATH')
     request_type = models.CharField(choices=http_type,max_length=10,null=True,blank=True,verbose_name='请求类型')
-    request_headers = DictField(null=True,blank=True,verbose_name='请求头')
-    request_data = DictField(null=True,blank=True,verbose_name='请求数据')
-    request_meta = DictField(null=True,blank=True,verbose_name='请求元数据')
+    request_headers = DictField(null=True,blank=True,verbose_name='请求头',unique=False)
+    request_data = DictField(null=True,blank=True,verbose_name='请求数据',unique=False)
+    request_meta = DictField(null=True,blank=True,verbose_name='请求元数据',unique=False)
     response_status_code = models.CharField(max_length=10,null=True,blank=True,verbose_name='响应状态码')
-    response_data = DictField(null=True,blank=True,verbose_name='响应数据')
+    response_data = DictField(null=True,blank=True,verbose_name='响应数据',unique=False)
 
     class Meta:
         verbose_name = "用户日志"

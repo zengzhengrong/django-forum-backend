@@ -26,7 +26,7 @@ if DEBUG:
     ALLOWED_HOSTS = ['*']
 else:
     # production 
-    ALLOWED_HOSTS = ['your host name']
+    ALLOWED_HOSTS = [env.str('DOMAIN')]
 
 SITE_ID = 1
 

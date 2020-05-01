@@ -1,25 +1,65 @@
 version: '3'
 
 services:
+  nginx:
+    container_name: django-forum-backend-nginx-container-prd
+    restart: unless-stopped
+    image: nginx
+    ports:
+      - 80:80
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./nginx/conf.d/django.conf:/etc/nginx/conf.d/django.conf:ro
+      - api_data:/api
+      - phpmyadmin_data:/var/www/html/:ro
+    depends_on:
+      - django-forum-backend
+      - phpmyadmin
+ 
   django-forum-backend:
-    container_name: django-forum-backend-container
+    container_name: django-forum-backend-api-container-prd
     build: ./forum_backend
     restart: always
-    ports:
-     - "8001:8000"
+    command: './wait-for-it.sh -h db -p 3306 -s -- ./entrypoint.sh'
+    volumes:
+      - api_data:/api
+      - ./forum_backend/logs:/api/logs
     depends_on:
       - django-forum-redis
-    command: python manage.py runserver 0.0.0.0:8000
+      - db
+
   django-forum-redis:
-    container_name: django-forum-redis-container2
+    container_name: django-forum-backend-redis-container-prd
     image: redis:alpine
     restart: always
 
-  # db:
-  #   container_name: django-postgres-container
-  #   image: postgres
-  #   restart: unless-stopped
-  #   ports: 
-  #     - 5432:5432
-  #   environment:
-  #     POSTGRES_PASSWORD: 5432
+  db:
+    container_name: django-forum-backend-mysql-container
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: forum
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: zzradmin
+      TZ: "Asia/Shanghai"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    container_name: django-forum-backend-phpmyadmin-container
+    image: phpmyadmin/phpmyadmin:fpm-alpine
+    restart: unless-stopped
+    volumes:
+      - phpmyadmin_data:/var/www/html/
+    environment:
+      TZ: "Asia/Shanghai"
+    depends_on:
+      - db
+
+volumes:
+  api_data:
+  db_data:
+  phpmyadmin_data:

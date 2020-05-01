@@ -11,7 +11,8 @@
 	// "postCreateCommand": "cd forum_backend && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt",
 	"extensions": [
 		"ms-python.python",
-		"mikestead.dotenv"
+		"mikestead.dotenv",
+		"alexcvzz.vscode-sqlite"
 	],
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
 	// "runServices": ["web","db","django-forum-redis"],

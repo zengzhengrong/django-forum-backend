@@ -80,13 +80,20 @@ REDOC_SETTINGS = {
 # 配置Logging settings
 LOGGING_FORMATTERS = {
     'verbose': {'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'},
-    'simple': {'format': '%(levelname)s %(message)s'}
+    'simple': {'format': '%(levelname)s %(message)s'},
+    'email':{'format':'%(levelname)s %(asctime)s %(source)s %(process)d %(thread)d %(message)s %(username)s %(email)s %(signature)s'}
     }
 LOGGING_HANDLERS = {
             'console': {
                 'level': 'INFO',
                 'class': 'logging.StreamHandler',
                 'formatter': 'simple'
+            },
+            'file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': f'{BASE_DIR}/logs/email.log',
+                'formatter': 'email',
             },
             'logstash': {
                 'level': 'WARNING',
@@ -98,6 +105,7 @@ LOGGING_HANDLERS = {
                 'fqdn': False,  # Fully qualified domain name. Default value: false.
                 'tags': ['django.request'],
             },
+
         }
 
 LOGGING_LOGGERS = {
@@ -111,6 +119,11 @@ LOGGING_LOGGERS = {
                 'level': 'WARNING',
                 'propagate': True,
             },
+            'send_email':{
+                'handlers': ['file'],
+                'level': 'INFO',
+                'propagate': True,
+            }
         }
 if env.bool('ELK'):
     LOGGING = {
@@ -135,6 +148,7 @@ EMAIL_SUBJECT_PREFIX = 'django-forum-email'
 EMAIL_USE_TLS = True
 # EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = env('EMAIL_HOST_USER')
+EMAIL_ACTIVE_DOMAIN = env.str('EMAIL_ACTIVE_DOMAIN')
 
 # 更改密码时需要验证旧密码
 OLD_PASSWORD_FIELD_ENABLED = True

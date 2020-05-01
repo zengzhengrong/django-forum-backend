@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userlog',
             name='request_headers',
-            field=utils.models_field.DictField(blank=True, null=True, verbose_name='请求头'),
+            field=utils.models_field.DictField(unique=False,blank=True, null=True, verbose_name='请求头'),
         ),
     ]
