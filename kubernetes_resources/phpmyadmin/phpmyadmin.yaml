@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-forum-phpmyadmin
+  namespace: django-forum
+  labels:
+    app: django-forum-phpmyadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-forum-phpmyadmin
+  template:
+    metadata:
+      labels:
+        app: django-forum-phpmyadmin
+    spec:
+      containers:
+        - name: django-forum-phpmyadmin
+          image: phpmyadmin/phpmyadmin
+          env:
+            - name: TZ
+              value: "Asia/Shanghai"
+            - name: PMA_HOST
+              value: django-forum-mysql
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "128m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-forum-phpmyadmin
+  namespace: django-forum
+  labels:
+    app: django-forum-phpmyadmin
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: django-forum-phpmyadmin
+  type: ClusterIP
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    app: django-forum-phpmyadmin
+  name: django-forum-phpmyadmin-ingress
+  namespace: django-forum
+spec:
+  rules:
+    - host: django-forum-phpmyadmin.com
+      http:
+        paths:
+        - backend:
+            serviceName: django-forum-phpmyadmin
+            servicePort: 80

@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from user.permissions import IsUserOwnerOrReadOnly,IsAdmin
 from user.models import UserProfile,UserLog
-from rest_framework import viewsets, mixins
-from .serializers import UserSerializer,UserProfileSerializer,UserLogSerializer
+from rest_framework import viewsets, mixins,parsers
+from .serializers import UserSerializer,UserProfileSerializer,UserLogSerializer,PutUserProfileSerializer
 from .pagination import UserLogPagination
 from utils.token_required import token_required,method_decorator
+from drf_yasg.utils import swagger_auto_schema
 
 User = get_user_model()
 
@@ -18,12 +19,14 @@ class UserModelViewSet(viewsets.ReadOnlyModelViewSet,mixins.UpdateModelMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,IsUserOwnerOrReadOnly)
+    parser_classes=(parsers.MultiPartParser,)
 
     @method_decorator(token_required)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
     @method_decorator(token_required)
+    @swagger_auto_schema(request_body=PutUserProfileSerializer,)
     def update(self, request, *args, **kwargs):
         self.serializer_class = UserProfileSerializer
         return super().update(request, *args, **kwargs)

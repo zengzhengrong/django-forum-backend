@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+  namespace: django-forum
+data:
+  django.conf.template: |-
+    server {
+        listen    80;
+        listen  [::]:80;
+        charset     utf-8;
+        client_max_body_size 75M;
+        server_name     localhost;
+
+        location /static {
+            alias /api/static;
+        }
+
+        location /media {
+            alias /api/media;
+            expires 24h;
+        }
+
+        location /flower-internal/ {
+            internal;
+            rewrite ^/flower-internal/(.*)$ /$1 break;
+            proxy_pass ${FLOWER_BACKEND};
+            proxy_set_header Host $host;
+        }
+        
+        location / {
+            uwsgi_pass  unix:/api/run/api.sock;        
+            include     uwsgi_params;
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-forum-nginx
+  namespace: django-forum
+  labels:
+    app: django-forum-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-forum-nginx
+  template:
+    metadata:
+      labels:
+        app: django-forum-nginx
+    spec:
+      containers:
+        - name: django-forum-nginx
+          image: nginx
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: FLOWER_BACKEND
+              value: "http://django-forum-backend:5555"
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "500Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+          volumeMounts:
+            - mountPath: "/etc/nginx/templates"
+              name: "nginx-conf"
+            - mountPath: "/api/run"
+              name: "nginx-persistent-storage"
+            - mountPath: "/api/static"
+              name: "nginx-persistent-storage"
+            - mountPath: "/api/media"
+              name: "nginx-persistent-storage"
+      volumes:
+        - name: "nginx-conf"
+          configMap:
+            name: "nginx-conf"
+            items:
+              - key: "django.conf.template"
+                path: "default.conf.template"
+        - name: "nginx-persistent-storage"
+          persistentVolumeClaim:
+            claimName: django-forum-backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-forum-nginx
+  namespace: django-forum
+  labels:
+    app: django-forum-nginx
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: django-forum-nginx
+  type: ClusterIP
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    app: django-forum-nginx
+  name: django-forum-nginx-ingress
+  namespace: django-forum
+spec:
+  rules:
+    - host: django-forum-api.com
+      http:
+        paths:
+          - backend:
+              serviceName: django-forum-nginx
+              servicePort: 80

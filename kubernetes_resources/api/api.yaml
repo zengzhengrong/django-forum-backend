@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-forum-backend-config
+  namespace: django-forum
+data:
+  K8S: "on"
+  K8S_DATABASE_URL: "mysql://admin:zzradmin@django-forum-mysql:3306/forum"
+  K8S_CELERY_REDIS_URL: "redis://django-forum-redis:6379"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-forum-backend
+  namespace: django-forum
+  labels:
+    app: django-forum-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-forum-backend
+  template:
+    metadata:
+      labels:
+        app: django-forum-backend
+    spec:
+      terminationGracePeriodSeconds: 20
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - django-forum-backend
+                topologyKey: kubernetes.io/hostname
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - django-forum-mysql
+                      - django-forum-redis
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: django-forum-backend
+          image: core.harbor.zeron.com/django/django-forum-backend:v1
+          command:
+          - ./wait-for-it.sh
+          - -h
+          - django-forum-mysql
+          - -p
+          - "3306"
+          - -s
+          - --
+          - ./entrypoint.sh
+          ports:
+            - name: http
+              containerPort: 5555
+          envFrom:
+            - configMapRef:
+                name: django-forum-backend-config
+          resources:
+            requests:
+              cpu: "256m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: django-forum-backend-data
+              mountPath: /api/run
+            - name: django-forum-backend-data
+              mountPath: /api/static
+            - name: django-forum-backend-data
+              mountPath: /api/media
+      volumes:
+        - name: django-forum-backend-data
+          persistentVolumeClaim:
+            claimName: django-forum-backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: django-forum
+  name: django-forum-backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5555
+      name: http
+      targetPort: 5555
+      protocol: TCP
+  selector:
+    app: django-forum-backend
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: django-forum-backend
+  namespace: django-forum
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "100Mi"
+  storageClassName: nfs-client

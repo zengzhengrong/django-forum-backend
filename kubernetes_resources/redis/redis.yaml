@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-conf
+  namespace: django-forum
+data:
+  redis.conf: |-
+    dir /var/lib/redis
+    port 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-forum-redis
+  namespace: django-forum
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-forum-redis
+      appCluster: django-forum-redis-cluster
+  template:
+    metadata:
+      labels:
+        app: django-forum-redis
+        appCluster: django-forum-redis-cluster
+    spec:
+      terminationGracePeriodSeconds: 20
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - django-forum-redis
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: redis
+          image: "redis:6.0"
+          command:
+            - "redis-server"
+          args:
+            - "/etc/redis/redis.conf"
+            - "--protected-mode"
+            - "no"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: "TCP"
+          volumeMounts:
+            - name: "redis-conf"
+              mountPath: "/etc/redis"
+            - name: "redis-persistent-storage"
+              mountPath: "/var/lib/redis"
+      volumes:
+        - name: "redis-conf"
+          configMap:
+            name: "redis-conf"
+            items:
+              - key: "redis.conf"
+                path: "redis.conf"
+        - name: redis-persistent-storage
+          persistentVolumeClaim:
+            claimName: django-forum-redis
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: django-forum-redis
+  namespace: django-forum
+  labels:
+    app: django-forum-redis
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      protocol: TCP
+  selector:
+    app: django-forum-redis
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: django-forum-redis
+  namespace: django-forum
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "200M"
+  storageClassName: nfs-client

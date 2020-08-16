@@ -36,6 +36,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class PutUserProfileSerializer(serializers.Serializer):
+    nickname = serializers.CharField(help_text='昵称',required=False)
+    description = serializers.CharField(help_text='简介',required=False)
+    avatar = serializers.FileField(help_text='头像',required=False)
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='user:user-detail')
     nickname = serializers.CharField(source='profile.nickname')
@@ -46,6 +51,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     start = serializers.DateTimeField(source='profile.start',read_only=True)
     end = serializers.DateTimeField(source='profile.end',read_only=True)
     vip = serializers.BooleanField(source='profile.vip',read_only=True)
+    created = serializers.DateTimeField(source='profile.created',read_only=True)
+    modified = serializers.DateTimeField(source='profile.modified',read_only=True)
+    profile_id = serializers.IntegerField(source='profile.id',read_only=True)
 
     class Meta:
         model = User
@@ -59,7 +67,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                             'last_login_ip',
                             'register_ip',
                             'start',
-                            'end')
+                            'end',
+                            'modified',
+                            'created',
+                            'profile_id')
         fields = ('id',
                 'url',
                 'username', 
@@ -74,7 +85,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                 'last_login_ip',
                 'register_ip',
                 'start',
-                'end')
+                'end',
+                'modified',
+                'created',
+                'profile_id')
 
 class UserSimpleSerializer(serializers.ModelSerializer):
     class Meta:

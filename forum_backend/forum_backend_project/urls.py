@@ -74,6 +74,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('api-index/',ApiRoot,name='api-index'),
+    path('',ApiRoot,name='api-index'),
     path('category/', include('category.urls')),
     path('notification/', include('notification.urls')),
     path('post/', include('post.urls')),

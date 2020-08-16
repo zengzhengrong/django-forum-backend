@@ -42,7 +42,7 @@ REST_FRAMEWORK = {
 
 # DATABASES Settings
 DATABASES = {
-    'default':env.db()
+    'default':env.db() if env.bool('K8S') == False else env.db('K8S_DATABASE_URL')
 }
 
 # 配置Swagger UI / Open API
@@ -167,13 +167,13 @@ JWT_AUTH = {
 SESSION_COOKIE_AGE = 600 * 10
 
 # 配置Celery
-CELERY_BROKER_URL = env('CELERY_REDIS_URL')
+CELERY_BROKER_URL = env('CELERY_REDIS_URL') if env.bool('K8S') == False else env('K8S_CELERY_REDIS_URL')
 #: Only add pickle to this list if your broker is secured
 #: from unwanted access (see userguide/security.html)
 CELERY_TASK_ROUTES = {
     'user.tasks.add': {'queue': 'math'}
     }
-CELERY_RESULT_BACKEND = env('CELERY_REDIS_URL')
+CELERY_RESULT_BACKEND = env('CELERY_REDIS_URL') if env.bool('K8S') == False else env('K8S_CELERY_REDIS_URL')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Shanghai'

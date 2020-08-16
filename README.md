@@ -16,7 +16,21 @@
 authentication部分，我参考了django-rest-auth的源码，尤其是serializer和view部分，并额外加入了部分判断逻辑
 
 
-> ### docker-compose 运行
+> ### 部署
+
+1. docker-compose 部署  
+
+    执行docker-compose-deploy.yaml
+    ```
+    docker-compose -f docker-compose-deploy.yaml up 
+    ```
+
+1. 部署到k8s
+
+    参考 kubernetes_resources 目录  
+    [kubernetes_resources](kubernetes_resources/README.md)
+
+> ### docker-compose 测试开发运行
 Clone repo 并运行
 ```
 docker-compose up

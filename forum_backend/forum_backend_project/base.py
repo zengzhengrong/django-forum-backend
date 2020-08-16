@@ -20,13 +20,16 @@ env.read_env(BASE_DIR('forum_backend_project','forum.env')) # read .env file
 SECRET_KEY = env('SECRET_KEY')
 
 DEBUG = env('DEBUG')
-
+K8S = env('K8S')
 if DEBUG:
     # dev
     ALLOWED_HOSTS = ['*']
 else:
     # production 
     ALLOWED_HOSTS = [env.str('DOMAIN')]
+if K8S:
+    # allowed all 
+    ALLOWED_HOSTS = ['*']
 
 SITE_ID = 1
 
