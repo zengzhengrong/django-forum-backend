@@ -3,7 +3,7 @@
 ## step 0 (前提条件)
 已有kubernetes环境  
 已安装存储类，这里使用目前比较流行的nfs解决方案，具体怎么安装请参考https://github.com/helm/charts/tree/master/stable/nfs-client-provisioner,  
-先安装nfs server 再使用helm安装 nfs-client 来创建存储类
+先安装nfs server 再使用helm安装 nfs-client 来创建存储类  
 dns已解析ingress中的域名，如果没有建议将service的```type: ClusterIP```改成```type: NodePort```通过ip加端口进行访问
 
 
