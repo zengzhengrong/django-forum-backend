@@ -561,6 +561,8 @@ from utils.token_required import token_required,method_decorator
 
 
 > ### Change Log
+
+[2020-8-16]:新增kubernetes 部署资源
 [2020-5-1]:docker-compose 一键部署 nginx + api + redis + celery + mysql + phpmyadmin  
 [2020-4-27]:新增ELK 整合，django日志推送到Elasticsearch ，kibana可视化  
 [2020-4-25]:修复在容器内开发时 vscode sqlite3插件不可用 ，现在已经可以直接右键 ```Open Database```查看sqlite3表（底下的SQLITE EXPLORER）  
