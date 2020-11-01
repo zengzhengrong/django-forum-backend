@@ -50,7 +50,7 @@ spec:
               topologyKey: kubernetes.io/hostname
       containers:
         - name: django-forum-backend
-          image: core.harbor.zeron.com/django/django-forum-backend:v1
+          image: zengzhengrong889/django-forum-backend
           command:
           - ./wait-for-it.sh
           - -h
