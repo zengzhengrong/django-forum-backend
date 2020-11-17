@@ -10,7 +10,7 @@ python -m utils.populate
 
 echo "Run uwsgi"
 if [ ! -d "run" ]; then
-  mkdir run
+  mkdir run && mkdir -p run/logs
 fi
 uwsgi -d --ini uwsgi.ini
 echo "Run celery"
