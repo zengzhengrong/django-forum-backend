@@ -20,8 +20,8 @@ fi
 uwsgi -d --ini uwsgi.ini
 
 echo "chmod api.sock"
-chmod 777 run/api.sock
-chmod +x run/api.sock
+chmod 777 /api/run/api.sock
+chmod +x /api/run/api.sock
 
 echo "Run celery"
 celery multi start -A forum_backend_project worker -l info -c 1
