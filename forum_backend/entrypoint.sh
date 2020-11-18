@@ -18,6 +18,11 @@ if [ ! -d "run" ]; then
 fi
 
 uwsgi -d --ini uwsgi.ini
+
+echo "chmod api.sock"
+chmod 777 run/api.sock
+chmod +x run/api.sock
+
 echo "Run celery"
 celery multi start -A forum_backend_project worker -l info -c 1
 echo "Await celery worker"
