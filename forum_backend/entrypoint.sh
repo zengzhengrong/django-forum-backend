@@ -7,11 +7,16 @@ python manage.py migrate
 echo "populating data"
 python -m utils.populate
 
+echo "Make log file"
+if [ ! -d "run/logs" ]; then
+ mkdir -p run/logs
+fi
 
 echo "Run uwsgi"
 if [ ! -d "run" ]; then
   mkdir run && mkdir -p run/logs
 fi
+
 uwsgi -d --ini uwsgi.ini
 echo "Run celery"
 celery multi start -A forum_backend_project worker -l info -c 1
