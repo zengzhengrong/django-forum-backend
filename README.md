@@ -10,11 +10,10 @@
 4.采用Celery做分布式任务
 5.Swagger UI (Open API)
 
-> ### 作为参考（学习）
+> ### Helm 部署
 
-使用了DRF作为前后端分离框架，而且使用jwt+session来做身份验证，需要对这部分有一定基础，建议萌新去刷一遍DRF的官方指导教程，视图主要采用ViewSet方式来实现，路由没有用DRF官方给的Router来构建路由（后续可能会改用）。在
-authentication部分，我参考了django-rest-auth的源码，尤其是serializer和view部分，并额外加入了部分判断逻辑
-
+在另一个项目
+https://github.com/zengzhengrong/django-forum-backend-helm
 
 > ### 部署
 
@@ -561,7 +560,7 @@ from utils.token_required import token_required,method_decorator
 
 
 > ### Change Log
-
+[2020-12-16]:新增helm 一键部署方式
 [2020-8-16]:新增kubernetes 部署资源
 [2020-5-1]:docker-compose 一键部署 nginx + api + redis + celery + mysql + phpmyadmin  
 [2020-4-27]:新增ELK 整合，django日志推送到Elasticsearch ，kibana可视化  
