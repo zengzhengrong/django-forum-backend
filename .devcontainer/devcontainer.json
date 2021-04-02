@@ -12,7 +12,8 @@
 	"extensions": [
 		"ms-python.python",
 		"mikestead.dotenv",
-		"alexcvzz.vscode-sqlite"
+		"alexcvzz.vscode-sqlite",
+		"njpwerner.autodocstring"
 	],
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
 	// "runServices": ["web","db","django-forum-redis"],
