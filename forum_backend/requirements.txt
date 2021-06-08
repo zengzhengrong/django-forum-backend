@@ -29,7 +29,7 @@ mysqlclient==1.4.6
 oauthlib==3.0.1
 packaging==20.3
 pilkit==2.0
-Pillow==6.0.0
+Pillow==8.2.0
 PyJWT==1.7.1
 PyMySQL==0.9.3
 pyparsing==2.4.7
